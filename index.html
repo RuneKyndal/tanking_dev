@@ -26,7 +26,7 @@
         .btn-nav { background: #000; color: #fff; padding: 14px; width: 100%; font-size: 1.2rem; border-radius: 10px; margin-top: 10px; }
 
         /* ── CALC PAGE ── */
-        .preset-row { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; justify-content: flex-end; }
+        .preset-row { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; justify-content: space-between; }
         .btn-preset { padding: 12px 10px; background: #f0f0f0; font-size: 0.85rem; width: auto; white-space: nowrap; }
         .btn-manual { flex: 0 0 auto; padding: 10px 8px; background: #fff; font-size: 0.7rem; border: 2px solid #000; border-radius: 6px; font-weight: bold; text-decoration: none; color: #000; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
 
@@ -79,9 +79,9 @@
         .bingo-box.warn { background: #ffeb00; }
         .bingo-box.warn-red { background: #ff3300; color: #fff; }
         .bingo-box.warn-red .bingo-reserve { color: #ffdddd; }
-        .bingo-header-row { display: flex; align-items: baseline; justify-content: center; margin-bottom: 4px; position: relative; }
-        .bingo-title { font-size: 1.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
-        .bingo-reserve { font-size: 0.85rem; color: #555; font-weight: bold; position: absolute; right: 0; bottom: 0; }
+        .bingo-header-row { display: flex; align-items: baseline; gap: 8px; justify-content: center; margin-bottom: 4px; }
+        .bingo-title { font-size: 1.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bingo-reserve { font-size: 0.85rem; color: #555; font-weight: bold; }
         .bingo-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px 16px; justify-content: center; }
         .bingo-time { font-size: 2.1rem; font-weight: bold; flex: 0 0 auto; }
         .bingo-dist { font-size: 1.6rem; font-weight: bold; flex: 0 0 auto; }
@@ -111,11 +111,14 @@
     <h2>Tanking app v5.4</h2>
 
     <div class="preset-row">
-        <!-- (1) Manual + Update — top left, left of Bell 214B button -->
-        <a class="btn-manual" href="#" onclick="showPage('manual-page'); return false;">&#9432; Manual</a>
-        <a class="btn-manual" href="#" onclick="forceUpdate(); return false;">&#8635; Update</a>
-        <button class="btn-preset" onclick="applyPreset('214B')">Bell 214B</button>
-        <button class="btn-preset" onclick="applyPreset('214ST')">Bell 214ST</button>
+        <div style="display:flex; gap:6px;">
+            <a class="btn-manual" href="#" onclick="showPage('manual-page'); return false;">&#9432; Manual</a>
+            <a class="btn-manual" href="#" onclick="forceUpdate(); return false;">&#8635; Update</a>
+        </div>
+        <div style="display:flex; gap:6px;">
+            <button class="btn-preset" onclick="applyPreset('214B')">Bell 214B</button>
+            <button class="btn-preset" onclick="applyPreset('214ST')">Bell 214ST</button>
+        </div>
     </div>
 
     <div class="input-block">
@@ -198,23 +201,27 @@
 <!-- ── FLIGHT PAGE ── -->
 <div id="flight-page" class="page" style="flex-direction:column;">
 
-    <!-- Top bar: BACK | FUELBURN | GS TARGET | GPS | PERMIT -->
-    <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; margin-bottom:5px; gap:4px;">
-        <button style="background:#d9534f; color:#fff; height:50px; flex:0 0 70px;" onclick="leaveFlight()">BACK</button>
-        <div style="text-align:center; flex:0 0 auto;">
-            <label style="font-size:0.65rem; font-weight:bold;">FUELBURN lbs/hr</label>
-            <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:1rem; display:block; width:auto; border:2px solid #000; border-radius:4px; font-family:inherit;">
-                <option value="600">600</option><option value="650">650</option><option value="700">700</option>
-                <option value="750">750</option><option value="800">800</option><option value="850">850</option>
-                <option value="900">900</option><option value="950">950</option><option value="1000">1000</option>
-            </select>
+    <!-- Top bar: [BACK | FUELBURN | GS TARGET] ... [GPS | PERMIT] -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; gap:4px;">
+        <div style="display:flex; align-items:center; gap:4px;">
+            <button style="background:#d9534f; color:#fff; height:50px; padding:0 12px; flex:0 0 auto;" onclick="leaveFlight()">BACK</button>
+            <div style="text-align:center; flex:0 0 auto;">
+                <label style="font-size:0.65rem; font-weight:bold;">FUELBURN lbs/hr</label>
+                <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:1rem; display:block; width:auto; border:2px solid #000; border-radius:4px; font-family:inherit;">
+                    <option value="600">600</option><option value="650">650</option><option value="700">700</option>
+                    <option value="750">750</option><option value="800">800</option><option value="850">850</option>
+                    <option value="900">900</option><option value="950">950</option><option value="1000">1000</option>
+                </select>
+            </div>
+            <div style="text-align:center; flex:0 0 auto;">
+                <label style="font-size:0.65rem; font-weight:bold;">TARGET GS kts</label>
+                <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:1rem; display:block; width:auto; border:2px solid #000; border-radius:4px; font-family:inherit;"></select>
+            </div>
         </div>
-        <div style="text-align:center; flex:0 0 auto;">
-            <label style="font-size:0.65rem; font-weight:bold;">TARGET GS kts</label>
-            <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:1rem; display:block; width:auto; border:2px solid #000; border-radius:4px; font-family:inherit;"></select>
+        <div style="display:flex; align-items:center; gap:4px;">
+            <button id="gps-btn" class="gps-off" style="height:50px; padding:0 10px; font-size:0.75rem;" onclick="toggleGPS()">GPS OFF</button>
+            <button id="gps-perm-btn" style="height:50px; padding:2px 6px; background:#444; color:#fff; font-size:0.6rem;" onclick="forceGPSPermission()">GPS PERMIT</button>
         </div>
-        <button id="gps-btn" class="gps-off" style="height:50px; flex:0 0 70px; font-size:0.75rem;" onclick="toggleGPS()">GPS OFF</button>
-        <button id="gps-perm-btn" style="height:50px; flex:0 0 72px; background:#444; color:#fff; font-size:0.6rem; padding:2px;" onclick="forceGPSPermission()">GPS PERMIT</button>
     </div>
 
     <!-- Flight timer -->

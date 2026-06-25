@@ -1,0 +1,84 @@
+// sw.js — Tanking App v3.9
+const CACHE_NAME = 'tanking-v39';
+
+const ASSETS = [
+    './index.html',
+    './manifest.json',
+    './sw.js',
+    './tank.png',
+    './tank_maskable.png'
+];
+
+self.addEventListener('install', function(event) {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(function(cache) {
+                console.log('[SW] Pre-caching assets');
+                return cache.addAll(ASSETS);
+            })
+            .then(function() {
+                return self.skipWaiting();
+            })
+    );
+});
+
+// Allow the page to force a full reset: delete every cache this SW owns,
+// then take over immediately so the next fetches go to the network fresh.
+self.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'FORCE_UPDATE') {
+        event.waitUntil(
+            caches.keys().then(function(keys) {
+                return Promise.all(keys.map(function(key) { return caches.delete(key); }));
+            }).then(function() {
+                return self.skipWaiting();
+            }).then(function() {
+                // Tell the page(s) it's safe to reload now
+                return self.clients.matchAll().then(function(clients) {
+                    clients.forEach(function(c) { c.postMessage({ type: 'FORCE_UPDATE_DONE' }); });
+                });
+            })
+        );
+    }
+});
+
+self.addEventListener('activate', function(event) {
+    event.waitUntil(
+        caches.keys().then(function(keys) {
+            return Promise.all(
+                keys
+                    .filter(function(key) { return key !== CACHE_NAME; })
+                    .map(function(key) {
+                        console.log('[SW] Removing old cache:', key);
+                        return caches.delete(key);
+                    })
+            );
+        }).then(function() {
+            return self.clients.claim();
+        })
+    );
+});
+
+// Network-first, cache fallback
+// Online  → always fresh from GitHub
+// Offline → serves from cache
+self.addEventListener('fetch', function(event) {
+    if (event.request.method !== 'GET') return;
+    event.respondWith(
+        fetch(event.request)
+            .then(function(response) {
+                if (response && response.status === 200) {
+                    var clone = response.clone();
+                    caches.open(CACHE_NAME).then(function(cache) {
+                        cache.put(event.request, clone);
+                    });
+                }
+                return response;
+            })
+            .catch(function() {
+                return caches.match(event.request).then(function(cached) {
+                    if (cached) return cached;
+                    console.warn('[SW] Offline and not cached:', event.request.url);
+                });
+            })
+    );
+});

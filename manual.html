@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="US-ASCII">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanking App Manual</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #111111;
+            border-bottom: 2px solid #eeeeee;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #222222;
+            margin-top: 30px;
+            border-bottom: 1px solid #dddddd;
+            padding-bottom: 5px;
+        }
+        p {
+            margin: 10px 0;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .note {
+            background-color: #f9f9f9;
+            border-left: 4px solid #cccccc;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+        .button-text {
+            font-weight: bold;
+            background-color: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #cccccc;
+        }
+    </style>
+</head>
+<body>
+
+    <p class="note" style="margin-top:0;">
+        <button id="exit-btn" style="font-weight:bold; font-size:0.95rem; padding:8px 16px; border:2px solid #000; border-radius:6px; background:#000; color:#fff; cursor:pointer;">&#8592; Exit Manual</button>
+    </p>
+
+    <h1>Tanking App Manual</h1>
+    
+    <p class="note">
+        This is a very early release. All suggestions are welcome.<br>
+        The source code is published here for review, or if you want to fork it and build your own from here:<br>
+        <a href="https://github.com/RuneKyndal/tanking/" target="_blank">https://github.com/RuneKyndal/tanking/</a>
+    </p>
+
+    <h2>Quick Start</h2>
+    <p>The app is designed as a "WebApp". For it to work properly when offline, it must be installed (not just a saved shortcut).</p>
+
+    <h3>iOS Installation</h3>
+    <ul>
+        <li>Use Safari browser (not Chrome).</li>
+        <li>Go to the link. Once loaded, tap "Share" + more, then select "Add to Home Screen".</li>
+        <li>Ensure the "Web App" tickbox is ON.</li>
+        <li>Close everything, and launch the app from your homescreen to perform the initial download.</li>
+        <li>Ensure you give all requested permissions to the app.</li>
+    </ul>
+
+    <h3>Android Installation</h3>
+    <ul>
+        <li>Suggested browser: Chrome.</li>
+        <li>Go to the link. Once loaded, click the menu options and choose "Add to Home Screen".</li>
+        <li>Click the "Install" option (NOT the shortcut option).</li>
+        <li>Close the browser, and launch the app from your homescreen to perform the initial download.</li>
+        <li>Ensure you give all requested permissions to the app.</li>
+    </ul>
+
+    <h2>Start</h2>
+    <ul>
+        <li>Choose aircraft type, then update weights and fuel load.</li>
+        <li>Click <span class="button-text">go start</span>.</li>
+        <li>If desired, use engine timers.</li>
+        <li>Click <span class="button-text">go fly</span> (this starts the flight timer).</li>
+    </ul>
+
+    <h2>In Flight</h2>
+    <ul>
+        <li>Ensure GPS activates.</li>
+        <li>Verify fuel burn rate and desired target ground speed.</li>
+        <li>Occasionally update the fuel load to match the aircraft as fuel is burned.</li>
+    </ul>
+
+    <h2>Flight Log</h2>
+    <ul>
+        <li>Click the <span class="button-text">back</span> button to return to the timer page.</li>
+        <li>Stop/start timers.</li>
+        <li>Save to log.</li>
+        <li>Export logs.</li>
+    </ul>
+    <script>
+        document.getElementById('exit-btn').addEventListener('click', function () {
+            // If this page is loaded inside the app's iframe, tell the parent to
+            // close the manual and show the main calc page again.
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'EXIT_MANUAL' }, '*');
+            } else {
+                // Opened directly/standalone (e.g. in its own tab) — just go back.
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app v5.2</title>
+    <title>Tanking app v5.3</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -106,7 +106,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app v5.2</h2>
+    <h2>Tanking app v5.3</h2>
 
     <div class="preset-row">
         <!-- (1) Manual + Update — top left, left of Bell 214B button -->
@@ -271,14 +271,13 @@
                     <path id="gs-green-arc" d="M 100 20 A 80 80 0 0 1 143.2 31.8" fill="none" stroke="#00cc44" stroke-width="14" transform="rotate(-27 100 100)"/>
                     <path id="gs-green-arc2" d="M 100 20 A 80 80 0 0 0 56.8 31.8" fill="none" stroke="#00cc44" stroke-width="14" transform="rotate(27 100 100)"/>
                     <!-- Tick marks -->
-                    <g id="gs-tick-group" stroke="#888" stroke-width="1"></g>
-                    <!-- Scale labels -->
-                    <text x="12"  y="113" text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-min-val">--</text>
-                    <text x="100" y="14"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-tgt-val">--</text>
-                    <text x="188" y="113" text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-max-val">--</text>
+                    <g id="gs-tick-group" stroke="#000" stroke-width="1.5"></g>
+                    <!-- Scale labels: positioned above/outside their tick marks -->
+                    <text x="8"   y="97"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-min-val">--</text>
+                    <text x="100" y="6"   text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-tgt-val">--</text>
+                    <text x="192" y="97"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-max-val">--</text>
                     <!-- Digital speed readout -->
                     <text x="100" y="88" text-anchor="middle" font-size="48" font-weight="bold" fill="#000" id="fly-gs-svg">0</text>
-                    <text x="100" y="102" text-anchor="middle" font-size="8" font-weight="bold" fill="#666" letter-spacing="1">KTS GS</text>
                     <!-- Needle -->
                     <g id="needle-group" style="transform:rotate(0deg); transform-origin:100px 100px; transition:transform 0.2s linear;">
                         <line x1="100" y1="100" x2="100" y2="25" stroke="#333" stroke-width="3" stroke-linecap="round"/>
@@ -841,8 +840,10 @@
         if (!g) return;
         for (var i = -90; i <= 90; i += 9) {
             var l = document.createElementNS('http://www.w3.org/2000/svg','line');
-            l.setAttribute('x1','100'); l.setAttribute('y1','22');
-            l.setAttribute('x2','100'); l.setAttribute('y2','30');
+            l.setAttribute('x1','100'); l.setAttribute('y1','8');
+            l.setAttribute('x2','100'); l.setAttribute('y2','27');
+            l.setAttribute('stroke','#000');
+            l.setAttribute('stroke-width','1.5');
             l.setAttribute('transform','rotate('+i+' 100 100)');
             g.appendChild(l);
         }

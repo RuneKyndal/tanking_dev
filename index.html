@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V6.3</title>
+    <title>Tanking app V6.2</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -79,9 +79,9 @@
         .bingo-box.warn { background: #ffeb00; }
         .bingo-box.warn-red { background: #ff3300; color: #fff; }
         .bingo-box.warn-red .bingo-reserve { color: #ffdddd; }
-        .bingo-header-row { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+        .bingo-header-row { display: block; text-align: center; margin-bottom: 4px; white-space: nowrap; overflow: hidden; }
         .bingo-title { font-size: 1.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
-        .bingo-reserve { font-size: 0.85rem; color: #555; font-weight: bold; position: absolute; right: 0; top: 50%; transform: translateY(-50%); white-space: nowrap; }
+        .bingo-reserve { font-size: 0.85rem; color: #555; font-weight: bold; display: inline-block; margin-left: 8px; vertical-align: middle; }
         .bingo-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px 16px; justify-content: center; }
         .bingo-time { font-size: 2.1rem; font-weight: bold; flex: 0 0 auto; }
         .bingo-dist { font-size: 1.6rem; font-weight: bold; flex: 0 0 auto; }
@@ -140,7 +140,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V6.3</h2>
+    <h2>Tanking app V6.2</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -239,16 +239,16 @@
             <button style="background:#d9534f; color:#fff; height:50px; padding:0 12px; flex:0 0 auto;" onclick="leaveFlight()">BACK</button>
             <button id="dark-toggle-btn" style="height:50px; padding:0 10px; font-size:0.75rem; background:#333; color:#fff; border-color:#555;" onclick="toggleDark()">🌙 DARK</button>
             <div style="text-align:center; flex:0 0 auto;">
-                <label style="font-size:0.65rem; font-weight:bold; display:block;">FUELBURN lbs/hr</label>
-                <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:1rem; display:block; width:100%; border:2px solid #000; border-radius:4px; font-family:inherit;">
+                <label style="font-size:0.65rem; font-weight:bold;">FUELBURN lbs/hr</label>
+                <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:1rem; display:block; width:auto; border:2px solid #000; border-radius:4px; font-family:inherit;">
                     <option value="600">600</option><option value="650">650</option><option value="700">700</option>
                     <option value="750">750</option><option value="800">800</option><option value="850">850</option>
                     <option value="900">900</option><option value="950">950</option><option value="1000">1000</option>
                 </select>
             </div>
             <div style="text-align:center; flex:0 0 auto;">
-                <label style="font-size:0.65rem; font-weight:bold; display:block;">TARGET GS kts</label>
-                <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:1rem; display:block; width:100%; border:2px solid #000; border-radius:4px; font-family:inherit;"></select>
+                <label style="font-size:0.65rem; font-weight:bold;">TARGET GS kts</label>
+                <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:1rem; display:block; width:auto; border:2px solid #000; border-radius:4px; font-family:inherit;"></select>
             </div>
         </div>
         <div style="display:flex; align-items:center; gap:4px;">
@@ -315,9 +315,9 @@
                     <!-- Tick marks -->
                     <g id="gs-tick-group" stroke="#000" stroke-width="1.5"></g>
                     <!-- Scale labels: positioned above/outside their tick marks -->
-                    <text x="8"   y="103"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-min-val">--</text>
-                    <text x="100" y="14"   text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-tgt-val">--</text>
-                    <text x="192" y="103"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-max-val">--</text>
+                    <text x="8"   y="97"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-min-val">--</text>
+                    <text x="100" y="6"   text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-tgt-val">--</text>
+                    <text x="192" y="97"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-max-val">--</text>
                     <!-- Digital speed readout -->
                     <text x="100" y="88" text-anchor="middle" font-size="48" font-weight="bold" fill="#000" id="fly-gs-svg">0</text>
                     <!-- Needle -->
@@ -392,72 +392,87 @@
     });
 
     // ── (1) Force Update ─────────────────────────────────────────────────────
-    // Wipes every cache this app owns, unregisters the old service worker,
-    // re-registers a fresh one, then hard-reloads bypassing the HTTP cache too.
+    // Saves user settings/logs, wipes all SW caches, unregisters the SW,
+    // force-fetches fresh copies of every app file, then hard-reloads.
+    // Settings (aircraft values, burn rate, GS target, logs, dark mode) are preserved.
+
+    var KEEP_KEYS = ['settings_214B', 'settings_214ST', 'hLogV36', 'darkMode'];
+
     function forceUpdate() {
-        showDialog("Update app now?\n\nThis re-downloads all files from scratch and clears the offline cache.", function() {
+        showDialog("Update app now?\n\nAll app files will be re-downloaded.\nYour settings and logs are kept.", function() {
             runForceUpdate();
         }, null);
     }
 
     function runForceUpdate() {
         var status = document.getElementById('update-status');
-        if (status) status.textContent = 'Clearing cache…';
+        function setStatus(msg) { if (status) status.textContent = msg; }
 
-        // Step 1: Unregister ALL service workers so nothing can intercept the reload
-        var unregister = ('serviceWorker' in navigator)
+        setStatus('Saving settings…');
+
+        // Step 1: Snapshot every key we want to keep
+        var saved = {};
+        KEEP_KEYS.forEach(function(k) {
+            var v = localStorage.getItem(k);
+            if (v !== null) saved[k] = v;
+        });
+
+        // Step 2: Unregister ALL service workers
+        var unregSW = ('serviceWorker' in navigator)
             ? navigator.serviceWorker.getRegistrations().then(function(regs) {
                 return Promise.all(regs.map(function(r) { return r.unregister(); }));
               })
             : Promise.resolve();
 
-        // Step 2: Wipe every Cache Storage bucket (SW offline cache)
+        // Step 3: Delete every Cache Storage bucket
         var clearCaches = ('caches' in window)
             ? caches.keys().then(function(keys) {
                 return Promise.all(keys.map(function(k) { return caches.delete(k); }));
               })
             : Promise.resolve();
 
-        // Step 3: Wipe all IndexedDB databases
-        var clearIDB = new Promise(function(resolve) {
-            if (!window.indexedDB || !indexedDB.databases) { resolve(); return; }
-            indexedDB.databases().then(function(dbs) {
-                var dels = dbs.map(function(db) {
-                    return new Promise(function(res) {
-                        var req = indexedDB.deleteDatabase(db.name);
-                        req.onsuccess = req.onerror = req.onblocked = res;
-                    });
-                });
-                Promise.all(dels).then(resolve).catch(resolve);
-            }).catch(resolve);
-        });
+        setStatus('Clearing cache…');
 
-        Promise.all([unregister, clearCaches, clearIDB]).then(function() {
-            if (status) status.textContent = 'Downloading fresh files…';
+        Promise.all([unregSW, clearCaches]).then(function() {
+            setStatus('Downloading fresh files…');
 
-            // Step 4: Force-fetch every asset with no-store so the browser
-            // pulls directly from the server and cannot serve anything cached.
-            var bust = '?nocache=' + Date.now();
+            // Step 4: Force-fetch every app asset fresh from the server.
+            // cache:'reload' bypasses the HTTP disk cache on the outbound request
+            // so the browser must contact the server, not serve a local copy.
+            // Individual failures (e.g. manual.html not on server) are ignored.
+            var bust = '?t=' + Date.now();
             var assets = [
                 './index.html', './sw.js', './manifest.json',
                 './manual.html', './tank.png'
             ];
             return Promise.all(assets.map(function(url) {
-                return fetch(url + bust, {
-                    cache: 'no-store',
-                    headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
-                }).catch(function() {});
+                return fetch(url + bust, { cache: 'reload' }).catch(function() {});
             }));
-        }).then(function() {
-            if (status) status.textContent = 'Saving & reloading…';
 
-            // Step 5: Hard navigate back to this same page — just strip any existing
-            // query string and add a fresh bust token. No path manipulation needed.
+        }).then(function() {
+            setStatus('Restoring settings…');
+
+            // Step 5: Clear localStorage then put only the saved keys back,
+            // so no stale app-state from an old version can linger.
+            localStorage.clear();
+            KEEP_KEYS.forEach(function(k) {
+                if (saved[k] !== undefined) localStorage.setItem(k, saved[k]);
+            });
+
+            setStatus('Reloading…');
+
+            // Step 6: Hard-navigate with a fresh cache-bust token.
+            // replace() so the Back button doesn't re-open the stale page.
             var cleanUrl = window.location.origin + window.location.pathname;
-            window.location.replace(cleanUrl + '?v=6.0&t=' + Date.now());
+            window.location.replace(cleanUrl + '?t=' + Date.now());
+
         }).catch(function(err) {
-            console.warn('[Update] fallback reload, error:', err);
-            // Last-resort: at minimum hard-reload
+            console.warn('[Update] error, forcing reload:', err);
+            // Always restore settings even on the error path
+            localStorage.clear();
+            KEEP_KEYS.forEach(function(k) {
+                if (saved[k] !== undefined) localStorage.setItem(k, saved[k]);
+            });
             window.location.reload(true);
         });
     }
@@ -1001,7 +1016,7 @@
         if (ng) ng.style.transform = 'rotate(' + deg + 'deg)';
         // colour the digital readout
         var gsText = document.getElementById('fly-gs-svg');
-        if (gsText) gsText.setAttribute('fill', document.body.classList.contains('dark') ? '#e0e0e0' : '#000');
+        if (gsText) gsText.setAttribute('fill', Math.abs(diff) <= 3 ? '#00cc44' : (document.body.classList.contains('dark') ? '#e0e0e0' : '#000'));
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────

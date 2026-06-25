@@ -77,22 +77,28 @@
         .bingo-row { margin-bottom: 8px; }
         .bingo-box { border: 3px solid #000; border-radius: 14px; padding: 16px 14px; background: #fff; }
         .bingo-box.warn { background: #ffeb00; }
+        .bingo-header-row { display: flex; align-items: baseline; gap: 8px; justify-content: center; margin-bottom: 4px; }
+        .bingo-title { font-size: 1.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bingo-reserve { font-size: 0.85rem; color: #555; font-weight: bold; }
         .bingo-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px 16px; justify-content: center; }
-        .bingo-title { width: 100%; font-size: 1.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; margin-bottom: 4px; }
-        .bingo-time { font-size: 2.1rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; flex: 0 0 auto; }
+        .bingo-time { font-size: 2.1rem; font-weight: bold; flex: 0 0 auto; }
         .bingo-dist { font-size: 1.6rem; font-weight: bold; flex: 0 0 auto; }
-        .bingo-reserve { width: 100%; text-align: center; font-size: 1.1rem; color: #555; flex: 0 0 auto; }
 
-        /* ── LANDSCAPE LAYOUT ── */
+        /* ── GS GAUGE ── */
+        .gs-gauge-outer { width: 100%; display: flex; justify-content: center; align-items: center; }
+        .gs-gauge-outer svg { width: 100%; height: auto; max-height: 38vh; display: block; }
+        @media (orientation: landscape) and (min-width: 768px) {
+            .gs-gauge-outer svg { max-height: 55vh; }
+        }
         /* Same stacked order as portrait (fuel/payload -> bingo -> gauge),
            just sized to fit a wide-short landscape viewport instead of a tall one. */
+        /* ── LANDSCAPE LAYOUT ── */
         @media (orientation: landscape) and (min-width: 768px) {
             #flight-page { overflow-y: auto; }
             .ls-topbar { display: flex !important; }
             .ls-fuel-payload { display: flex !important; gap: 6px; }
             .ls-fuel-payload > .bubble-v198 { flex: 1; }
             .ls-gauge-wrap { width: 100% !important; }
-            .ls-gauge-wrap svg { width: 100% !important; max-height: 60vh; }
         }
     </style>
 </head>
@@ -202,11 +208,11 @@
             </select>
         </div>
         <div style="text-align:center; flex:1; min-width:70px;">
-            <label style="font-size:0.65rem; font-weight:bold;">GS TARGET</label>
+            <label style="font-size:0.65rem; font-weight:bold;">TARGET GS kts</label>
             <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:1rem; display:block; width:100%; border:2px solid #000; border-radius:4px; font-family:inherit;"></select>
         </div>
         <button id="gps-btn" class="gps-off" style="height:50px; flex:0 0 70px; font-size:0.75rem;" onclick="toggleGPS()">GPS OFF</button>
-        <button id="gps-perm-btn" style="height:50px; flex:0 0 62px; background:#444; color:#fff; font-size:0.6rem; padding:2px;" onclick="forceGPSPermission()">PERMIT</button>
+        <button id="gps-perm-btn" style="height:50px; flex:0 0 72px; background:#444; color:#fff; font-size:0.6rem; padding:2px;" onclick="forceGPSPermission()">GPS PERMIT</button>
     </div>
 
     <!-- Flight timer -->
@@ -238,12 +244,14 @@
             <!-- (2) FUEL ENDURANCE — single box, 2x size -->
             <div class="bingo-row ls-bingo-row">
                 <div class="bingo-box" id="bingo-box">
+                    <div class="bingo-header-row">
+                        <span class="bingo-title">FUEL ENDURANCE</span>
+                        <span class="bingo-reserve">w/ 500lb reserve</span>
+                    </div>
                     <div class="bingo-line">
-                        <span class="bingo-title">Fuel Endurance</span>
-                        <span class="bingo-time" id="bingo-time">--hr : --min</span>
+                        <span class="bingo-time" id="bingo-time">--h:--m</span>
                         <span class="bingo-dist"><span id="bingo-80-dist">--</span> Nm@80kts</span>
                         <span class="bingo-dist"><span id="bingo-100-dist">--</span> Nm@100kts</span>
-                        <span class="bingo-reserve">with 500lb reserve</span>
                     </div>
                 </div>
             </div>
@@ -253,17 +261,29 @@
 
         <!-- RIGHT COLUMN: GS gauge — sits BELOW the left column, full width, ~2x height -->
         <div class="ls-col-right" style="display:block;">
-            <!-- GS gauge -->
-            <div class="ls-gauge-wrap" style="flex:1; display:flex; flex-direction:column; align-items:center;">
-                <svg viewBox="0 0 200 230" style="width:100%;">
-                    <path d="M 20 160 A 110 110 0 0 1 180 160" fill="none" stroke="#ffeb3b" stroke-width="22" stroke-linecap="round"/>
-                    <path d="M 60 64 A 110 110 0 0 1 140 64" fill="none" stroke="#4caf50" stroke-width="22"/>
-                    <text x="100" y="62"  font-size="16" font-weight="bold" id="gs-tgt-val" text-anchor="middle">--</text>
-                    <text x="14"  y="166" font-size="13" font-weight="bold" id="gs-min-val" text-anchor="middle">--</text>
-                    <text x="186" y="166" font-size="13" font-weight="bold" id="gs-max-val" text-anchor="middle">--</text>
-                    <text x="100" y="185" font-size="68" font-weight="bold" id="fly-gs-svg" text-anchor="middle">0</text>
-                    <text x="100" y="212" font-size="16" font-weight="bold" fill="#444" text-anchor="middle">KTS</text>
-                    <line id="needle-ptr" x1="100" y1="160" x2="100" y2="55" stroke="#f00" stroke-width="6" stroke-linecap="round"/>
+            <div class="ls-gauge-wrap gs-gauge-outer">
+                <svg id="gs-gauge-svg" viewBox="0 0 200 135" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background arc (full sweep, grey) -->
+                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#ddd" stroke-width="14" stroke-linecap="round"/>
+                    <!-- Yellow arc (full sweep) -->
+                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#ffcc00" stroke-width="14" stroke-linecap="round"/>
+                    <!-- Green zone: centre ±3 kts (±27°) -->
+                    <path id="gs-green-arc" d="M 100 20 A 80 80 0 0 1 143.2 31.8" fill="none" stroke="#00cc44" stroke-width="14" transform="rotate(-27 100 100)"/>
+                    <path id="gs-green-arc2" d="M 100 20 A 80 80 0 0 0 56.8 31.8" fill="none" stroke="#00cc44" stroke-width="14" transform="rotate(27 100 100)"/>
+                    <!-- Tick marks -->
+                    <g id="gs-tick-group" stroke="#888" stroke-width="1"></g>
+                    <!-- Scale labels -->
+                    <text x="12"  y="113" text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-min-val">--</text>
+                    <text x="100" y="14"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-tgt-val">--</text>
+                    <text x="188" y="113" text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-max-val">--</text>
+                    <!-- Digital speed readout -->
+                    <text x="100" y="88" text-anchor="middle" font-size="48" font-weight="bold" fill="#000" id="fly-gs-svg">0</text>
+                    <text x="100" y="102" text-anchor="middle" font-size="8" font-weight="bold" fill="#666" letter-spacing="1">KTS GS</text>
+                    <!-- Needle -->
+                    <g id="needle-group" style="transform:rotate(0deg); transform-origin:100px 100px; transition:transform 0.2s linear;">
+                        <line x1="100" y1="100" x2="100" y2="25" stroke="#333" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="100" cy="100" r="5" fill="#333"/>
+                    </g>
                 </svg>
             </div>
         </div>
@@ -641,7 +661,7 @@
         var box = document.getElementById('bingo-box');
 
         if (usable <= 0) {
-            document.getElementById('bingo-time').innerText     = '00hr : 00min';
+            document.getElementById('bingo-time').innerText     = '00h:00m';
             document.getElementById('bingo-80-dist').innerText  = '0';
             document.getElementById('bingo-100-dist').innerText = '0';
         } else {
@@ -649,7 +669,7 @@
             var mins = Math.round(hrs * 60); // total minutes
             var h    = Math.floor(mins / 60);
             var m    = mins % 60;
-            document.getElementById('bingo-time').innerText = String(h).padStart(2,'0') + 'hr : ' + String(m).padStart(2,'0') + 'min';
+            document.getElementById('bingo-time').innerText = String(h).padStart(2,'0') + 'h:' + String(m).padStart(2,'0') + 'm';
             document.getElementById('bingo-80-dist').innerText  = Math.round(hrs * 80);
             document.getElementById('bingo-100-dist').innerText = Math.round(hrs * 100);
         }
@@ -816,14 +836,31 @@
     }
 
     // ── GS gauge ──────────────────────────────────────────────────────────────
+    (function drawGSTicks() {
+        var g = document.getElementById('gs-tick-group');
+        if (!g) return;
+        for (var i = -90; i <= 90; i += 9) {
+            var l = document.createElementNS('http://www.w3.org/2000/svg','line');
+            l.setAttribute('x1','100'); l.setAttribute('y1','22');
+            l.setAttribute('x2','100'); l.setAttribute('y2','30');
+            l.setAttribute('transform','rotate('+i+' 100 100)');
+            g.appendChild(l);
+        }
+    })();
+
     function updateGSUI() {
         var tgt = parseFloat(document.getElementById('gs-target-select').value);
-        document.getElementById('gs-min-val').textContent = tgt - 10;
+        document.getElementById('gs-min-val').textContent = Math.max(0, tgt - 10);
         document.getElementById('gs-tgt-val').textContent = tgt;
         document.getElementById('gs-max-val').textContent = tgt + 10;
         document.getElementById('fly-gs-svg').textContent = Math.round(curGS);
-        var rotation = Math.max(-95, Math.min(95, (curGS - tgt) * 9));
-        document.getElementById('needle-ptr').setAttribute('transform', 'rotate(' + rotation + ', 100, 160)');
+        var diff = curGS - tgt;
+        var deg  = Math.min(90, Math.max(-90, diff * 9));
+        var ng = document.getElementById('needle-group');
+        if (ng) ng.style.transform = 'rotate(' + deg + 'deg)';
+        // colour the digital readout
+        var gsText = document.getElementById('fly-gs-svg');
+        if (gsText) gsText.setAttribute('fill', Math.abs(diff) <= 3 ? '#00aa33' : '#000');
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────

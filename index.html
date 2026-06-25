@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app v5.1</title>
+    <title>Tanking app v5.2</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -26,9 +26,9 @@
         .btn-nav { background: #000; color: #fff; padding: 14px; width: 100%; font-size: 1.2rem; border-radius: 10px; margin-top: 10px; }
 
         /* ── CALC PAGE ── */
-        .preset-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
-        .btn-preset { flex: 1; padding: 12px 5px; background: #f0f0f0; font-size: 0.9rem; }
-        .btn-manual { flex: 0 0 auto; padding: 10px 12px; background: #fff; font-size: 0.75rem; border: 2px solid #000; border-radius: 6px; font-weight: bold; text-decoration: none; color: #000; display: flex; align-items: center; gap: 4px; }
+        .preset-row { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; }
+        .btn-preset { flex: 1; padding: 12px 4px; background: #f0f0f0; font-size: 0.85rem; }
+        .btn-manual { flex: 0 0 auto; padding: 10px 8px; background: #fff; font-size: 0.7rem; border: 2px solid #000; border-radius: 6px; font-weight: bold; text-decoration: none; color: #000; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
 
         .input-block { border: 2px solid #000; border-radius: 8px; margin-bottom: 8px; overflow: hidden; background: #fff; }
         .input-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-bottom: 1px solid #ddd; }
@@ -73,15 +73,15 @@
         /* Toast */
         #toast { display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 22px; border-radius: 10px; font-size: 0.9rem; z-index: 9999; white-space: nowrap; pointer-events: none; }
 
-        /* ── BINGO FUEL BOX ── */
-        .bingo-row { margin-bottom: 6px; }
-        .bingo-box { border: 2px solid #000; border-radius: 10px; padding: 10px 12px; background: #fff; }
-        .bingo-box.warn { background: #fff5cc; }
-        .bingo-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 10px; }
-        .bingo-title { font-size: 1.05rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; flex: 0 0 auto; }
-        .bingo-time { font-size: 1.05rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; flex: 0 0 auto; }
-        .bingo-dist { font-size: 0.95rem; font-weight: bold; flex: 0 0 auto; }
-        .bingo-reserve { font-size: 0.8rem; color: #555; flex: 0 0 auto; }
+        /* ── FUEL ENDURANCE BOX (2x size) ── */
+        .bingo-row { margin-bottom: 8px; }
+        .bingo-box { border: 3px solid #000; border-radius: 14px; padding: 16px 14px; background: #fff; }
+        .bingo-box.warn { background: #ffeb00; }
+        .bingo-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px 16px; justify-content: center; }
+        .bingo-title { width: 100%; font-size: 1.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; margin-bottom: 4px; }
+        .bingo-time { font-size: 2.1rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; flex: 0 0 auto; }
+        .bingo-dist { font-size: 1.6rem; font-weight: bold; flex: 0 0 auto; }
+        .bingo-reserve { width: 100%; text-align: center; font-size: 1.1rem; color: #555; flex: 0 0 auto; }
 
         /* ── LANDSCAPE LAYOUT ── */
         /* Same stacked order as portrait (fuel/payload -> bingo -> gauge),
@@ -91,12 +91,8 @@
             .ls-topbar { display: flex !important; }
             .ls-fuel-payload { display: flex !important; gap: 6px; }
             .ls-fuel-payload > .bubble-v198 { flex: 1; }
-            .ls-bingo-row .bingo-box { padding: 8px 10px; }
-            .ls-bingo-row .bingo-title,
-            .ls-bingo-row .bingo-time,
-            .ls-bingo-row .bingo-dist { font-size: 0.95rem; }
             .ls-gauge-wrap { width: 100% !important; }
-            .ls-gauge-wrap svg { width: 100% !important; max-height: 38vh; }
+            .ls-gauge-wrap svg { width: 100% !important; max-height: 60vh; }
         }
     </style>
 </head>
@@ -104,11 +100,12 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app v5.1</h2>
+    <h2>Tanking app v5.2</h2>
 
     <div class="preset-row">
-        <!-- (1) Manual link — top left, left of Bell 214B button -->
+        <!-- (1) Manual + Update — top left, left of Bell 214B button -->
         <a class="btn-manual" href="#" onclick="showPage('manual-page'); return false;">&#9432; Manual</a>
+        <a class="btn-manual" href="#" onclick="forceUpdate(); return false;">&#8635; Update</a>
         <button class="btn-preset" onclick="applyPreset('214B')">Bell 214B</button>
         <button class="btn-preset" onclick="applyPreset('214ST')">Bell 214ST</button>
     </div>
@@ -136,8 +133,6 @@
     </div>
 
     <button class="btn-nav" style="background:#28a745;" onclick="showPage('timer-page')">GO START</button>
-
-    <button class="btn-nav" style="background:#444; margin-top:8px; font-size:0.95rem; padding:10px;" onclick="forceUpdate()">&#8635; UPDATE APP</button>
     <div id="update-status" style="text-align:center; font-size:0.7rem; color:#888; margin-top:4px;"></div>
 </div>
 
@@ -195,22 +190,23 @@
 <!-- ── FLIGHT PAGE ── -->
 <div id="flight-page" class="page" style="flex-direction:column;">
 
-    <!-- Top bar: BACK | BURN | GS TARGET | GPS -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; gap:4px;">
-        <button style="background:#d9534f; color:#fff; height:50px; flex:0 0 80px;" onclick="leaveFlight()">BACK</button>
-        <div style="text-align:center;">
-            <label style="font-size:0.7rem; font-weight:bold;">BURN lbs/hr</label>
-            <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:1.1rem; display:block; border:2px solid #000; border-radius:4px; font-family:inherit;">
+    <!-- Top bar: BACK | FUELBURN | GS TARGET | GPS | PERMIT -->
+    <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; margin-bottom:5px; gap:4px;">
+        <button style="background:#d9534f; color:#fff; height:50px; flex:0 0 70px;" onclick="leaveFlight()">BACK</button>
+        <div style="text-align:center; flex:1; min-width:70px;">
+            <label style="font-size:0.65rem; font-weight:bold;">FUELBURN lbs/hr</label>
+            <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:1rem; display:block; width:100%; border:2px solid #000; border-radius:4px; font-family:inherit;">
                 <option value="600">600</option><option value="650">650</option><option value="700">700</option>
                 <option value="750">750</option><option value="800">800</option><option value="850">850</option>
                 <option value="900">900</option><option value="950">950</option><option value="1000">1000</option>
             </select>
         </div>
-        <div style="text-align:center;">
-            <label style="font-size:0.7rem; font-weight:bold;">GS TARGET</label>
-            <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:1.1rem; display:block; border:2px solid #000; border-radius:4px; font-family:inherit;"></select>
+        <div style="text-align:center; flex:1; min-width:70px;">
+            <label style="font-size:0.65rem; font-weight:bold;">GS TARGET</label>
+            <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:1rem; display:block; width:100%; border:2px solid #000; border-radius:4px; font-family:inherit;"></select>
         </div>
-        <button id="gps-btn" class="gps-off" style="height:50px; flex:0 0 80px;" onclick="toggleGPS()">GPS OFF</button>
+        <button id="gps-btn" class="gps-off" style="height:50px; flex:0 0 70px; font-size:0.75rem;" onclick="toggleGPS()">GPS OFF</button>
+        <button id="gps-perm-btn" style="height:50px; flex:0 0 62px; background:#444; color:#fff; font-size:0.6rem; padding:2px;" onclick="forceGPSPermission()">PERMIT</button>
     </div>
 
     <!-- Flight timer -->
@@ -239,12 +235,12 @@
                 </div>
             </div>
 
-            <!-- (2) BINGO FUEL — single box, one line -->
+            <!-- (2) FUEL ENDURANCE — single box, 2x size -->
             <div class="bingo-row ls-bingo-row">
                 <div class="bingo-box" id="bingo-box">
                     <div class="bingo-line">
-                        <span class="bingo-title">Bingo Fuel</span>
-                        <span class="bingo-time" id="bingo-time">--:--</span>
+                        <span class="bingo-title">Fuel Endurance</span>
+                        <span class="bingo-time" id="bingo-time">--hr : --min</span>
                         <span class="bingo-dist"><span id="bingo-80-dist">--</span> Nm@80kts</span>
                         <span class="bingo-dist"><span id="bingo-100-dist">--</span> Nm@100kts</span>
                         <span class="bingo-reserve">with 500lb reserve</span>
@@ -255,19 +251,19 @@
         </div>
         <!-- end left col -->
 
-        <!-- RIGHT COLUMN: GS gauge — sits BELOW the left column, full width, in both orientations -->
+        <!-- RIGHT COLUMN: GS gauge — sits BELOW the left column, full width, ~2x height -->
         <div class="ls-col-right" style="display:block;">
             <!-- GS gauge -->
             <div class="ls-gauge-wrap" style="flex:1; display:flex; flex-direction:column; align-items:center;">
-                <svg viewBox="0 0 200 145" style="width:100vw; margin-left:-10px;">
-                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#ffeb3b" stroke-width="18" stroke-linecap="round"/>
-                    <path d="M 73 24 A 80 80 0 0 1 127 24" fill="none" stroke="#4caf50" stroke-width="18"/>
-                    <text x="100" y="24"  font-size="10" font-weight="bold" id="gs-tgt-val" text-anchor="middle">--</text>
-                    <text x="18"  y="105" font-size="8"  font-weight="bold" id="gs-min-val" text-anchor="middle">--</text>
-                    <text x="182" y="105" font-size="8"  font-weight="bold" id="gs-max-val" text-anchor="middle">--</text>
-                    <text x="100" y="115" font-size="42" font-weight="bold" id="fly-gs-svg" text-anchor="middle">0</text>
-                    <text x="100" y="132" font-size="10" font-weight="bold" fill="#444" text-anchor="middle">KTS</text>
-                    <line id="needle-ptr" x1="100" y1="62" x2="100" y2="8" stroke="#f00" stroke-width="5" stroke-linecap="round"/>
+                <svg viewBox="0 0 200 230" style="width:100%;">
+                    <path d="M 20 160 A 110 110 0 0 1 180 160" fill="none" stroke="#ffeb3b" stroke-width="22" stroke-linecap="round"/>
+                    <path d="M 60 64 A 110 110 0 0 1 140 64" fill="none" stroke="#4caf50" stroke-width="22"/>
+                    <text x="100" y="62"  font-size="16" font-weight="bold" id="gs-tgt-val" text-anchor="middle">--</text>
+                    <text x="14"  y="166" font-size="13" font-weight="bold" id="gs-min-val" text-anchor="middle">--</text>
+                    <text x="186" y="166" font-size="13" font-weight="bold" id="gs-max-val" text-anchor="middle">--</text>
+                    <text x="100" y="185" font-size="68" font-weight="bold" id="fly-gs-svg" text-anchor="middle">0</text>
+                    <text x="100" y="212" font-size="16" font-weight="bold" fill="#444" text-anchor="middle">KTS</text>
+                    <line id="needle-ptr" x1="100" y1="160" x2="100" y2="55" stroke="#f00" stroke-width="6" stroke-linecap="round"/>
                 </svg>
             </div>
         </div>
@@ -629,12 +625,12 @@
         a.click();
     }
 
-    // ── (2) Bingo Fuel Calculator ─────────────────────────────────────────────
-    // Bingo = fly and land with 500 lbs reserve
+    // ── (2) Fuel Endurance Calculator ─────────────────────────────────────────
+    // Endurance = time remaining before landing with 500 lbs reserve
     // usable fuel = curFuel - 500 (reserve)
-    // time available = usable / burn_rate  (hours) -> shown as HH:MM
+    // time available = usable / burn_rate  (hours) -> shown as HHhr : MMmin
     // distance @ 80kts and @ 100kts = time * speed  (nm)
-    // Box turns yellow once remaining fuel drops to 700 lbs or below.
+    // Box turns bright yellow once remaining fuel drops to 700 lbs or below.
     var BINGO_RESERVE = 500; // lbs
     var BINGO_WARN_FUEL = 700; // lbs remaining
 
@@ -645,7 +641,7 @@
         var box = document.getElementById('bingo-box');
 
         if (usable <= 0) {
-            document.getElementById('bingo-time').innerText     = '00:00';
+            document.getElementById('bingo-time').innerText     = '00hr : 00min';
             document.getElementById('bingo-80-dist').innerText  = '0';
             document.getElementById('bingo-100-dist').innerText = '0';
         } else {
@@ -653,7 +649,7 @@
             var mins = Math.round(hrs * 60); // total minutes
             var h    = Math.floor(mins / 60);
             var m    = mins % 60;
-            document.getElementById('bingo-time').innerText = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+            document.getElementById('bingo-time').innerText = String(h).padStart(2,'0') + 'hr : ' + String(m).padStart(2,'0') + 'min';
             document.getElementById('bingo-80-dist').innerText  = Math.round(hrs * 80);
             document.getElementById('bingo-100-dist').innerText = Math.round(hrs * 100);
         }
@@ -678,11 +674,11 @@
             // Fuel + payload side by side to save vertical space
             fuelPayload.style.display = 'flex';
             fuelPayload.style.gap     = '6px';
-            if (gaugeSvg) { gaugeSvg.style.width = '100%'; gaugeSvg.style.marginLeft = '0'; gaugeSvg.style.maxHeight = '38vh'; }
+            if (gaugeSvg) { gaugeSvg.style.width = '100%'; gaugeSvg.style.maxHeight = '60vh'; }
         } else {
             // Portrait — stacked single column
             fuelPayload.style.display = 'block';
-            if (gaugeSvg) { gaugeSvg.style.width = '100vw'; gaugeSvg.style.marginLeft = '-10px'; gaugeSvg.style.maxHeight = ''; }
+            if (gaugeSvg) { gaugeSvg.style.width = '100%'; gaugeSvg.style.maxHeight = ''; }
         }
     }
 
@@ -782,6 +778,43 @@
         if (watchID !== null) { stopGPS(); } else { startGPS(); }
     }
 
+    // ── (3) Force GPS permission ─────────────────────────────────────────────
+    // A website/app can never re-open the browser's native permission dialog
+    // once the user has explicitly denied it — that's an OS/browser security
+    // rule, not something this code can override. What this CAN do:
+    //  - If permission has never been asked (state "prompt"), calling
+    //    getCurrentPosition() right now triggers that native prompt immediately.
+    //  - If it's already "denied", the only fix is in OS/browser settings, so
+    //    open the settings instructions instead of pretending to "force" it.
+    function forceGPSPermission() {
+        if (!navigator.geolocation) {
+            showDialog("This device/browser has no GPS support.", null, null);
+            return;
+        }
+        var settingsMsg = "Location access is denied.\n\niOS: Settings → Privacy & Security → Location Services → find this app (or Safari) → set to \"While Using\".\n\nAndroid: Settings → Apps → this app/browser → Permissions → Location → Allow.\n\nAfter changing it, come back and tap PERMIT again.";
+
+        if (navigator.permissions && navigator.permissions.query) {
+            navigator.permissions.query({ name: 'geolocation' }).then(function(result) {
+                if (result.state === 'denied') {
+                    showDialog(settingsMsg, null, null);
+                } else {
+                    // "prompt" or "granted" — asking again either shows the native
+                    // dialog or simply confirms access and starts the GPS watch.
+                    setGPSBtn('waiting', 'GPS...');
+                    doWatchPosition();
+                }
+            }).catch(function() {
+                // Permissions API unsupported (e.g. some iOS Safari versions) —
+                // just attempt the request; the browser will prompt if needed.
+                setGPSBtn('waiting', 'GPS...');
+                doWatchPosition();
+            });
+        } else {
+            setGPSBtn('waiting', 'GPS...');
+            doWatchPosition();
+        }
+    }
+
     // ── GS gauge ──────────────────────────────────────────────────────────────
     function updateGSUI() {
         var tgt = parseFloat(document.getElementById('gs-target-select').value);
@@ -790,7 +823,7 @@
         document.getElementById('gs-max-val').textContent = tgt + 10;
         document.getElementById('fly-gs-svg').textContent = Math.round(curGS);
         var rotation = Math.max(-95, Math.min(95, (curGS - tgt) * 9));
-        document.getElementById('needle-ptr').setAttribute('transform', 'rotate(' + rotation + ', 100, 100)');
+        document.getElementById('needle-ptr').setAttribute('transform', 'rotate(' + rotation + ', 100, 160)');
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────

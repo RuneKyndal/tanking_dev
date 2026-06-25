@@ -1,5 +1,5 @@
-// sw.js — Tanking App v3.9
-const CACHE_NAME = 'tanking-v39';
+// sw.js — Tanking App v3.10
+const CACHE_NAME = 'tanking-v310';
 
 const ASSETS = [
     './index.html',

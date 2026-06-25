@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V6.2</title>
+    <title>Tanking app v6.3</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -79,7 +79,7 @@
         .bingo-box.warn { background: #ffeb00; }
         .bingo-box.warn-red { background: #ff3300; color: #fff; }
         .bingo-box.warn-red .bingo-reserve { color: #ffdddd; }
-        .bingo-header-row { display: block; text-align: center; margin-bottom: 4px; white-space: nowrap; overflow: hidden; }
+        .bingo-header-row { display: flex; align-items: baseline; justify-content: center; margin-bottom: 4px; overflow: hidden; }
         .bingo-title { font-size: 1.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
         .bingo-reserve { font-size: 0.85rem; color: #555; font-weight: bold; display: inline-block; margin-left: 8px; vertical-align: middle; }
         .bingo-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px 16px; justify-content: center; }
@@ -140,7 +140,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V6.2</h2>
+    <h2>Tanking app v6.3</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -294,6 +294,7 @@
                         <span class="bingo-time" id="bingo-time">--h:--m</span>
                         <span class="bingo-dist"><span id="bingo-80-dist">--</span> Nm@80kts</span>
                         <span class="bingo-dist"><span id="bingo-100-dist">--</span> Nm@100kts</span>
+                        <span class="bingo-dist"><span id="bingo-110-dist">--</span> Nm@110kts</span>
                     </div>
                 </div>
             </div>
@@ -728,6 +729,7 @@
             document.getElementById('bingo-time').innerText     = '00h:00m';
             document.getElementById('bingo-80-dist').innerText  = '0';
             document.getElementById('bingo-100-dist').innerText = '0';
+            document.getElementById('bingo-110-dist').innerText = '0';
         } else {
             var hrs  = usable / burn;        // hours of flight remaining
             var mins = Math.round(hrs * 60); // total minutes
@@ -736,6 +738,7 @@
             document.getElementById('bingo-time').innerText = String(h).padStart(2,'0') + 'h:' + String(m).padStart(2,'0') + 'm';
             document.getElementById('bingo-80-dist').innerText  = Math.round(hrs * 80);
             document.getElementById('bingo-100-dist').innerText = Math.round(hrs * 100);
+            document.getElementById('bingo-110-dist').innerText = Math.round(hrs * 110);
         }
 
         if (fuel <= BINGO_WARN_RED) {
@@ -1001,7 +1004,7 @@
         if (ng) ng.style.transform = 'rotate(' + deg + 'deg)';
         // colour the digital readout
         var gsText = document.getElementById('fly-gs-svg');
-        if (gsText) gsText.setAttribute('fill', Math.abs(diff) <= 3 ? '#00cc44' : (document.body.classList.contains('dark') ? '#e0e0e0' : '#000'));
+        if (gsText) gsText.setAttribute('fill', document.body.classList.contains('dark') ? '#e0e0e0' : '#000');
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────

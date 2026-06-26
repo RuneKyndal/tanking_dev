@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V7.5</title>
+    <title>Tanking app V7.6</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -81,6 +81,10 @@
         .bingo-box.warn-red .bingo-reserve { color: #ffdddd; }
         .fuel-section.warn { background: #ffeb00; }
         .fuel-section.warn-red { background: #ff3300; color: #fff; }
+        .bubble-v198.warn { background: #ffeb00 !important; }
+        .bubble-v198.warn-red { background: #ff3300 !important; color: #fff; }
+        body.dark .bubble-v198.warn { background: #7a6e00 !important; color: #fff; }
+        body.dark .bubble-v198.warn-red { background: #8b1a00 !important; color: #fff; }
         .bingo-header-row { display: flex; align-items: center; justify-content: center; margin-bottom: 2px; }
         .bingo-title { font-size: 1.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
         .bingo-time-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-bottom: 6px; }
@@ -155,7 +159,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V7.5</h2>
+    <h2>Tanking app V7.6</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -286,17 +290,20 @@
                         </select>
                     </div>
                     <small style="font-weight:bold;">FUEL LOAD</small><br>
-                    <span class="val-xl-v198" id="fly-fuel-lbs">--</span><span class="unit-xl">Lbs</span>
-                    <div style="height:10px;"></div>
+                    <div style="display:flex; align-items:baseline; justify-content:center; gap:6px;">
+                        <span class="val-xl-v198" id="fly-fuel-lbs">--</span>
+                        <span class="unit-xl">Lbs</span>
+                    </div>
+                    <div style="height:6px;"></div>
                     <input type="range" id="fly-fuel-slider" min="500" max="3000" step="50" oninput="curFuel=parseFloat(this.value); updateBingo();">
                     <!-- Fuel Calc items below slider, inside fuel box -->
                     <div style="margin-top:10px; border-top:1px solid #ccc; padding-top:8px;">
-                        <div style="text-align:center; margin-bottom:6px;">
-                            <span class="bingo-endur-label" style="font-size:0.8rem;">ENDURANCE</span>
-                            <span class="bingo-time" id="bingo-time" style="font-size:1.6rem; font-weight:bold; margin-left:8px;">--h:--m</span>
-                            <span class="bingo-reserve" style="font-size:0.75rem; margin-left:6px;">(+500lbs rsv)</span>
+                        <div style="display:flex; align-items:baseline; justify-content:center; gap:8px; margin-bottom:6px;">
+                            <span style="font-size:0.75rem; font-weight:bold; color:#555; text-transform:uppercase;">ENDURANCE</span>
+                            <span id="bingo-time" style="font-size:0.75rem; font-weight:bold;">--h:--m</span>
+                            <span style="font-size:0.75rem; color:#555; font-weight:bold;">(+500lbs rsv)</span>
                         </div>
-                        <div class="bingo-plan-row" style="margin-top:4px; flex-wrap:wrap; gap:6px;">
+                        <div style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:4px;">
                             <span style="font-size:0.85rem; font-weight:bold;">Fuel Plan GS</span>
                             <select id="fuel-plan-gs" onchange="saveFuelPlanGS(); updateBingo();" style="font-size:1rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 4px;">
                                 <option value="70">70kts</option>
@@ -307,9 +314,9 @@
                                 <option value="120">120kts</option>
                                 <option value="actual">ACTUAL</option>
                             </select>
-                            <span style="font-size:1rem; font-weight:bold; white-space:nowrap;">Range=<span id="bingo-range-dist">--</span>Nm</span>
+                            <span style="font-size:0.85rem; font-weight:bold; white-space:nowrap;">Range=<span id="bingo-range-dist" style="font-size:0.85rem; font-weight:bold;">--</span>Nm</span>
                         </div>
-                        <div class="bingo-plan-row" id="ttb-row" style="margin-top:6px; padding:4px; border-radius:6px; flex-wrap:wrap; gap:6px;">
+                        <div id="ttb-row" style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:6px; padding:4px; border-radius:6px;">
                             <span style="font-size:0.85rem; font-weight:bold;">Dist to fuel</span>
                             <select id="dist-to-fuel" onchange="updateBingo(); saveSettings();" style="font-size:1rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 4px;">
                                 <option value="10">10</option><option value="20">20</option><option value="30">30</option>
@@ -318,14 +325,17 @@
                                 <option value="100" selected>100</option>
                             </select>
                             <span style="font-size:0.85rem; font-weight:bold;">Nm &nbsp; Bingo in</span>
-                            <span class="bingo-plan-value" id="time-to-bingo" style="font-size:1rem; font-weight:bold;">--:--</span>
+                            <span id="time-to-bingo" style="font-size:0.85rem; font-weight:bold;">--:--</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="bubble-v198">
                     <small style="font-weight:bold;">PAYLOAD</small><br>
-                    <span class="val-xl-v198" id="fly-ltr">--</span><span class="unit-xl">Liters</span>
+                    <div style="display:flex; align-items:baseline; justify-content:center; gap:6px;">
+                        <span class="val-xl-v198" id="fly-ltr">--</span>
+                        <span class="unit-xl">Liters</span>
+                    </div>
                 </div>
             </div>
 

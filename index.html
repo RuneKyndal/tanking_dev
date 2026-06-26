@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V7.7</title>
+    <title>Tanking app V7.8</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -159,7 +159,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V7.7</h2>
+    <h2>Tanking app V7.8</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -290,18 +290,18 @@
                         </select>
                     </div>
                     <small style="font-weight:bold;">FUEL LOAD</small><br>
-                    <div style="position:relative; display:flex; align-items:baseline; justify-content:center;">
-                        <span class="val-xl-v198" id="fly-fuel-lbs" style="text-align:center;">--</span>
-                        <span class="unit-xl" style="position:absolute; right:4px; bottom:0;">Lbs</span>
+                    <div style="display:flex; align-items:baseline; justify-content:center; gap:4px;">
+                        <span class="val-xl-v198" id="fly-fuel-lbs">--</span>
+                        <span class="unit-xl">Lbs</span>
                     </div>
                     <div style="height:6px;"></div>
                     <input type="range" id="fly-fuel-slider" min="500" max="3000" step="50" oninput="curFuel=parseFloat(this.value); updateBingo();">
                     <!-- Fuel Calc items below slider, inside fuel box -->
                     <div style="margin-top:10px; border-top:1px solid #ccc; padding-top:8px;">
                         <div style="display:flex; align-items:baseline; justify-content:center; gap:8px; margin-bottom:6px;">
-                            <span style="font-size:0.75rem; font-weight:bold; color:#555; text-transform:uppercase;">ENDURANCE</span>
+                            <span style="font-size:0.75rem; font-weight:bold; text-transform:uppercase;">ENDURANCE</span>
                             <span id="bingo-time" style="font-size:1.6rem; font-weight:bold;">--h:--m</span>
-                            <span style="font-size:0.75rem; color:#555; font-weight:bold;">(+500lbs rsv)</span>
+                            <span style="font-size:0.75rem; font-weight:bold;">(+500lbs rsv)</span>
                         </div>
                         <div style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:4px;">
                             <span style="font-size:0.85rem; font-weight:bold;">Fuel Plan GS</span>
@@ -314,7 +314,7 @@
                                 <option value="120">120kts</option>
                                 <option value="actual">ACTUAL</option>
                             </select>
-                            <span style="font-size:0.85rem; font-weight:bold; white-space:nowrap;">Range=<span id="bingo-range-dist" style="font-size:1.6rem; font-weight:bold;">--</span>Nm</span>
+                            <span style="font-size:0.85rem; font-weight:bold; white-space:nowrap;">Range <span id="bingo-range-dist" style="font-size:1.6rem; font-weight:bold;">--</span>Nm</span>
                         </div>
                         <div id="ttb-row" style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:6px; padding:4px; border-radius:6px;">
                             <span style="font-size:0.85rem; font-weight:bold;">Dist to fuel</span>
@@ -332,9 +332,9 @@
 
                 <div class="bubble-v198">
                     <small style="font-weight:bold;">PAYLOAD</small><br>
-                    <div style="position:relative; display:flex; align-items:baseline; justify-content:center;">
-                        <span class="val-xl-v198" id="fly-ltr" style="text-align:center;">--</span>
-                        <span class="unit-xl" style="position:absolute; right:4px; bottom:0;">Liters</span>
+                    <div style="display:flex; align-items:baseline; justify-content:center; gap:4px;">
+                        <span class="val-xl-v198" id="fly-ltr">--</span>
+                        <span class="unit-xl">Ltrs</span>
                     </div>
                 </div>
             </div>

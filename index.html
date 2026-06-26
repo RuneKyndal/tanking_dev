@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V7.1</title>
+    <title>Tanking app V7.2</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -86,9 +86,14 @@
         .bingo-time { font-size: 1.9rem; font-weight: bold; }
         .bingo-reserve { font-size: 0.75rem; color: #555; font-weight: bold; white-space: nowrap; }
         .bingo-plan-row { display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 8px; }
-        .bingo-plan-label { font-size: clamp(0.75rem, 3.5vw, 0.95rem); font-weight: bold; white-space: nowrap; }
-        .bingo-plan-row select { font-size: clamp(0.85rem, 4vw, 1.05rem); font-weight: bold; border: 2px solid #000; border-radius: 4px; font-family: inherit; padding: 2px 4px; }
-        .bingo-plan-range { font-size: clamp(0.75rem, 3.5vw, 0.95rem); font-weight: bold; white-space: nowrap; }
+        .bingo-plan-label { font-size: clamp(0.8rem, 3.8vw, 1rem); font-weight: bold; white-space: nowrap; }
+        .bingo-plan-row select { font-size: clamp(0.8rem, 3.8vw, 1rem); font-weight: bold; border: 2px solid #000; border-radius: 4px; font-family: inherit; padding: 2px 4px; }
+        .bingo-plan-range { font-size: clamp(0.8rem, 3.8vw, 1rem); font-weight: bold; white-space: nowrap; }
+        .bingo-plan-value { font-size: clamp(0.8rem, 3.8vw, 1rem); font-weight: bold; white-space: nowrap; }
+        #ttb-row.warn { background: #ffeb00; }
+        #ttb-row.warn-red { background: #ff3300; }
+        #ttb-row.warn-red .bingo-plan-label,
+        #ttb-row.warn-red .bingo-plan-value { color: #fff; }
 
         /* ── GS GAUGE ── */
         .gs-gauge-outer { width: 100%; display: flex; justify-content: center; align-items: center; }
@@ -126,6 +131,8 @@
         body.dark .bingo-reserve { color: #aaa; }
         body.dark .bingo-endur-label { color: #aaa; }
         body.dark .bingo-plan-row select { background: #2a2a2a; color: #f0f0f0; border-color: #555; }
+        body.dark #ttb-row.warn { background: #7a6e00; }
+        body.dark #ttb-row.warn-red { background: #8b1a00; }
         body.dark .dec-small { color: #aaa; }
         body.dark .timer-row { border-color: #555; }
         body.dark .timer-row[style*="background:#eef"] { background: #1e2535 !important; }
@@ -146,7 +153,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V7.1</h2>
+    <h2>Tanking app V7.2</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -314,11 +321,23 @@
                         </select>
                         <span class="bingo-plan-range">Range = <span id="bingo-range-dist">--</span>Nm</span>
                     </div>
-                    <div class="bingo-plan-row" style="margin-top:6px;">
+                    <div class="bingo-plan-row" id="ttb-row" style="margin-top:6px; padding:4px; border-radius:6px;">
                         <span class="bingo-plan-label">Distance to fuel</span>
-                        <input type="number" id="dist-to-fuel" value="100" min="0" step="5" oninput="updateBingo(); saveSettings();" style="width:70px; font-size:1.05rem; padding:4px;">
+                        <select id="dist-to-fuel" onchange="updateBingo(); saveSettings();">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                            <option value="40">40</option>
+                            <option value="50">50</option>
+                            <option value="60">60</option>
+                            <option value="70">70</option>
+                            <option value="80">80</option>
+                            <option value="90">90</option>
+                            <option value="100" selected>100</option>
+                        </select>
+                        <span class="bingo-plan-label">Nm</span>
                         <span class="bingo-plan-label">Time to Bingo</span>
-                        <span class="bingo-time" id="time-to-bingo" style="font-size:1.3rem;">--:--</span>
+                        <span class="bingo-plan-value" id="time-to-bingo">--:--</span>
                     </div>
                 </div>
             </div>
@@ -796,17 +815,32 @@
         var distEl = document.getElementById('dist-to-fuel');
         var dist   = distEl ? parseFloat(distEl.value) || 0 : 0;
         var ttbEl  = document.getElementById('time-to-bingo');
+        var ttbRow = document.getElementById('ttb-row');
         if (ttbEl) {
             if (!planGS || planGS <= 0) {
                 ttbEl.innerText = '--:--';
+                if (ttbRow) { ttbRow.classList.remove('warn','warn-red'); }
             } else {
                 var transitHrs  = dist / planGS;
                 var fuelNeeded  = transitHrs * burn + BINGO_RESERVE;
-                var ttbHrs      = (fuel - fuelNeeded) / burn;
+                var rawTtbHrs   = (fuel - fuelNeeded) / burn; // can go negative — already past bingo
+                var ttbHrs      = rawTtbHrs;
                 if (ttbHrs < 0) ttbHrs = 0;
                 var ttbMins = Math.round(ttbHrs * 60);
                 var th = Math.floor(ttbMins / 60), tm = ttbMins % 60;
                 ttbEl.innerText = String(th).padStart(2,'0') + ':' + String(tm).padStart(2,'0');
+
+                if (ttbRow) {
+                    if (rawTtbHrs <= 0) {
+                        ttbRow.classList.add('warn-red');
+                        ttbRow.classList.remove('warn');
+                    } else if (rawTtbHrs <= 0.25) { // 15 minutes
+                        ttbRow.classList.add('warn');
+                        ttbRow.classList.remove('warn-red');
+                    } else {
+                        ttbRow.classList.remove('warn','warn-red');
+                    }
+                }
             }
         }
 

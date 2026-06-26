@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V7.2</title>
+    <title>Tanking app V7.3</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -86,10 +86,10 @@
         .bingo-time { font-size: 1.9rem; font-weight: bold; }
         .bingo-reserve { font-size: 0.75rem; color: #555; font-weight: bold; white-space: nowrap; }
         .bingo-plan-row { display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 8px; }
-        .bingo-plan-label { font-size: clamp(0.8rem, 3.8vw, 1rem); font-weight: bold; white-space: nowrap; }
-        .bingo-plan-row select { font-size: clamp(0.8rem, 3.8vw, 1rem); font-weight: bold; border: 2px solid #000; border-radius: 4px; font-family: inherit; padding: 2px 4px; }
-        .bingo-plan-range { font-size: clamp(0.8rem, 3.8vw, 1rem); font-weight: bold; white-space: nowrap; }
-        .bingo-plan-value { font-size: clamp(0.8rem, 3.8vw, 1rem); font-weight: bold; white-space: nowrap; }
+        .bingo-plan-label { font-size: clamp(0.85rem, 4vw, 1.1rem); font-weight: bold; white-space: nowrap; }
+        .bingo-plan-row select { font-size: clamp(1rem, 4.6vw, 1.3rem); font-weight: bold; border: 2px solid #000; border-radius: 4px; font-family: inherit; padding: 2px 4px; }
+        .bingo-plan-range { font-size: clamp(1rem, 4.6vw, 1.3rem); font-weight: bold; white-space: nowrap; }
+        .bingo-plan-value { font-size: clamp(1rem, 4.6vw, 1.3rem); font-weight: bold; white-space: nowrap; }
         #ttb-row.warn { background: #ffeb00; }
         #ttb-row.warn-red { background: #ff3300; }
         #ttb-row.warn-red .bingo-plan-label,
@@ -153,7 +153,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V7.2</h2>
+    <h2>Tanking app V7.3</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -252,18 +252,6 @@
             <button style="background:#d9534f; color:#fff; height:50px; padding:0 12px; flex:0 0 auto;" onclick="leaveFlight()">BACK</button>
             <button id="dark-toggle-btn" style="height:50px; padding:0 10px; font-size:0.75rem; background:#333; color:#fff; border-color:#555;" onclick="toggleDark()">🌙 DARK</button>
             <button id="wake-btn" onclick="toggleWakeLock()" style="height:50px; padding:0 10px; font-size:0.75rem; background:#333; color:#fff; border-color:#555;">☀ AWAKE</button>
-            <div style="text-align:center; flex:0 0 auto;">
-                <label style="font-size:0.65rem; font-weight:bold; display:block;">FUELBURN lbs/hr</label>
-                <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:1rem; display:block; width:100%; border:2px solid #000; border-radius:4px; font-family:inherit;">
-                    <option value="600">600</option><option value="650">650</option><option value="700">700</option>
-                    <option value="750">750</option><option value="800">800</option><option value="850">850</option>
-                    <option value="900">900</option><option value="950">950</option><option value="1000">1000</option>
-                </select>
-            </div>
-            <div style="text-align:center; flex:0 0 auto;">
-                <label style="font-size:0.65rem; font-weight:bold; display:block;">TARGET GS kts</label>
-                <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:1rem; display:block; width:100%; border:2px solid #000; border-radius:4px; font-family:inherit;"></select>
-            </div>
         </div>
         <div style="display:flex; align-items:center; gap:4px;">
             <button id="gps-btn" class="gps-off" style="height:50px; padding:0 10px; font-size:0.75rem;" onclick="toggleGPS()">GPS OFF</button>
@@ -284,7 +272,15 @@
 
             <!-- FUEL LOAD + PAYLOAD side by side in landscape, stacked in portrait -->
             <div class="ls-fuel-payload" style="display:block;">
-                <div class="bubble-v198">
+                <div class="bubble-v198" style="position:relative;">
+                    <div style="position:absolute; top:4px; left:6px; text-align:left;">
+                        <label style="font-size:0.5rem; font-weight:bold; display:block; line-height:1;">BURN lbs/hr</label>
+                        <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:0.7rem; border:2px solid #000; border-radius:4px; font-family:inherit; padding:0 2px;">
+                            <option value="600">600</option><option value="650">650</option><option value="700">700</option>
+                            <option value="750">750</option><option value="800">800</option><option value="850">850</option>
+                            <option value="900">900</option><option value="950">950</option><option value="1000">1000</option>
+                        </select>
+                    </div>
                     <small style="font-weight:bold;">FUEL LOAD</small><br>
                     <span class="val-xl-v198" id="fly-fuel-lbs">--</span><span class="unit-xl">Lbs</span>
                     <div style="height:10px;"></div>
@@ -347,7 +343,11 @@
 
         <!-- RIGHT COLUMN: GS gauge — sits BELOW the left column, full width, ~2x height -->
         <div class="ls-col-right" style="display:block;">
-            <div class="ls-gauge-wrap gs-gauge-outer">
+            <div class="ls-gauge-wrap gs-gauge-outer" style="position:relative;">
+                <div style="position:absolute; top:4px; left:6px; text-align:left; z-index:5;">
+                    <label style="font-size:0.5rem; font-weight:bold; display:block; line-height:1;">TARGET GS</label>
+                    <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:0.7rem; border:2px solid #000; border-radius:4px; font-family:inherit; padding:0 2px;"></select>
+                </div>
                 <svg id="gs-gauge-svg" viewBox="0 0 200 135" xmlns="http://www.w3.org/2000/svg">
                     <!-- Background arc (full sweep, grey) -->
                     <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#ddd" stroke-width="14" stroke-linecap="round"/>

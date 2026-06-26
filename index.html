@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V7.4</title>
+    <title>Tanking app V7.5</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -155,7 +155,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V7.4</h2>
+    <h2>Tanking app V7.5</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -174,45 +174,12 @@
         <div class="input-row"><span>Crew + Gear</span><input type="number" id="crew-gear" value="400" oninput="updateWB(); saveSettings();"></div>
     </div>
 
-    <div class="fuel-section" id="calc-fuel-section">
+    <div class="fuel-section">
         <div class="fuel-header-row">
             <span class="fuel-label-text">FUEL</span>
             <div class="fuel-big-p1" id="fuel-display">2,750 lbs</div>
         </div>
         <input type="range" id="fuel-slider" min="500" max="3000" step="50" value="2750" oninput="updateWB(); saveSettings();">
-        <!-- Fuel Calc items moved here -->
-        <div style="margin-top:10px; border-top:1px solid #ccc; padding-top:8px;">
-            <div class="bingo-time-row" style="justify-content:flex-start; gap:10px;">
-                <span class="bingo-endur-label">ENDURANCE</span>
-                <span class="bingo-time" id="bingo-time">--h:--m</span>
-                <span class="bingo-reserve">(+500lbs rsv)</span>
-            </div>
-            <div class="bingo-plan-row" style="margin-top:6px;">
-                <span class="bingo-plan-label" style="font-size:0.8rem;">Fuel Plan GS</span>
-                <select id="fuel-plan-gs" onchange="saveFuelPlanGS(); updateBingo();" style="font-size:0.9rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 4px;">
-                    <option value="70">70kts</option>
-                    <option value="80">80kts</option>
-                    <option value="90">90kts</option>
-                    <option value="100" selected>100kts</option>
-                    <option value="110">110kts</option>
-                    <option value="120">120kts</option>
-                    <option value="actual">ACTUAL</option>
-                </select>
-                <span class="bingo-plan-range" style="font-size:0.9rem;">Range=<span id="bingo-range-dist">--</span>Nm</span>
-            </div>
-            <div class="bingo-plan-row" id="ttb-row" style="margin-top:6px; padding:4px; border-radius:6px;">
-                <span class="bingo-plan-label" style="font-size:0.8rem;">Dist to fuel</span>
-                <select id="dist-to-fuel" onchange="updateBingo(); saveSettings();" style="font-size:0.9rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 4px;">
-                    <option value="10">10</option><option value="20">20</option><option value="30">30</option>
-                    <option value="40">40</option><option value="50">50</option><option value="60">60</option>
-                    <option value="70">70</option><option value="80">80</option><option value="90">90</option>
-                    <option value="100" selected>100</option>
-                </select>
-                <span class="bingo-plan-label" style="font-size:0.8rem;">Nm</span>
-                <span class="bingo-plan-label" style="font-size:0.8rem;">Bingo in</span>
-                <span class="bingo-plan-value" id="time-to-bingo" style="font-size:0.9rem;">--:--</span>
-            </div>
-        </div>
     </div>
 
     <div class="bubble-v198">
@@ -288,7 +255,7 @@
             <button id="dark-toggle-btn" style="height:50px; padding:0 10px; font-size:0.75rem; background:#333; color:#fff; border-color:#555;" onclick="toggleDark()">🌙 DARK</button>
             <button id="wake-btn" onclick="toggleWakeLock()" style="height:50px; padding:0 10px; font-size:0.75rem; background:#333; color:#fff; border-color:#555;">☀ AWAKE</button>
         </div>
-        <div id="flight-ac-label" style="font-size:1rem; font-weight:bold; text-align:center; text-transform:uppercase; letter-spacing:1px; flex:1;">Bell 214B</div>
+        <div id="flight-ac-label" style="font-size:1.3rem; font-weight:bold; text-align:center; text-transform:uppercase; letter-spacing:1px; flex:1;">Bell 214B</div>
         <div style="display:flex; align-items:center; gap:4px;">
             <button id="gps-btn" class="gps-off" style="height:50px; padding:0 10px; font-size:0.75rem;" onclick="toggleGPS()">GPS OFF</button>
             <button id="gps-perm-btn" style="height:50px; padding:2px 6px; background:#444; color:#fff; font-size:0.6rem;" onclick="forceGPSPermission()">GPS PERMIT</button>
@@ -296,8 +263,8 @@
     </div>
 
     <!-- Flight timer -->
-    <div style="text-align:center; font-size:0.65rem; font-weight:bold; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">FLIGHT TIMER</div>
-    <div class="bubble-v198" style="padding:4px;">
+    <div class="bubble-v198" style="padding:6px; text-align:center;">
+        <small style="font-weight:bold; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px;">FLIGHT TIMER</small><br>
         <span id="flight-timer-main" style="font-family:monospace; font-size:2.4rem; font-weight:bold;">00:00:00</span>
     </div>
 
@@ -309,10 +276,10 @@
 
             <!-- FUEL LOAD + PAYLOAD side by side in landscape, stacked in portrait -->
             <div class="ls-fuel-payload" style="display:block;">
-                <div class="bubble-v198" style="position:relative;">
+                <div class="bubble-v198" id="fly-fuel-box" style="position:relative;">
                     <div style="position:absolute; top:4px; left:6px; text-align:left;">
-                        <label style="font-size:0.5rem; font-weight:bold; display:block; line-height:1;">BURN lbs/hr</label>
-                        <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:0.9rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 4px;">
+                        <label style="font-size:0.75rem; font-weight:bold; display:block; line-height:1.2;">BURN lbs/hr</label>
+                        <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:1rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 4px;">
                             <option value="600">600</option><option value="650">650</option><option value="700">700</option>
                             <option value="750">750</option><option value="800">800</option><option value="850">850</option>
                             <option value="900">900</option><option value="950">950</option><option value="1000">1000</option>
@@ -322,15 +289,45 @@
                     <span class="val-xl-v198" id="fly-fuel-lbs">--</span><span class="unit-xl">Lbs</span>
                     <div style="height:10px;"></div>
                     <input type="range" id="fly-fuel-slider" min="500" max="3000" step="50" oninput="curFuel=parseFloat(this.value); updateBingo();">
+                    <!-- Fuel Calc items below slider, inside fuel box -->
+                    <div style="margin-top:10px; border-top:1px solid #ccc; padding-top:8px;">
+                        <div style="text-align:center; margin-bottom:6px;">
+                            <span class="bingo-endur-label" style="font-size:0.8rem;">ENDURANCE</span>
+                            <span class="bingo-time" id="bingo-time" style="font-size:1.6rem; font-weight:bold; margin-left:8px;">--h:--m</span>
+                            <span class="bingo-reserve" style="font-size:0.75rem; margin-left:6px;">(+500lbs rsv)</span>
+                        </div>
+                        <div class="bingo-plan-row" style="margin-top:4px; flex-wrap:wrap; gap:6px;">
+                            <span style="font-size:0.85rem; font-weight:bold;">Fuel Plan GS</span>
+                            <select id="fuel-plan-gs" onchange="saveFuelPlanGS(); updateBingo();" style="font-size:1rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 4px;">
+                                <option value="70">70kts</option>
+                                <option value="80">80kts</option>
+                                <option value="90">90kts</option>
+                                <option value="100" selected>100kts</option>
+                                <option value="110">110kts</option>
+                                <option value="120">120kts</option>
+                                <option value="actual">ACTUAL</option>
+                            </select>
+                            <span style="font-size:1rem; font-weight:bold; white-space:nowrap;">Range=<span id="bingo-range-dist">--</span>Nm</span>
+                        </div>
+                        <div class="bingo-plan-row" id="ttb-row" style="margin-top:6px; padding:4px; border-radius:6px; flex-wrap:wrap; gap:6px;">
+                            <span style="font-size:0.85rem; font-weight:bold;">Dist to fuel</span>
+                            <select id="dist-to-fuel" onchange="updateBingo(); saveSettings();" style="font-size:1rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 4px;">
+                                <option value="10">10</option><option value="20">20</option><option value="30">30</option>
+                                <option value="40">40</option><option value="50">50</option><option value="60">60</option>
+                                <option value="70">70</option><option value="80">80</option><option value="90">90</option>
+                                <option value="100" selected>100</option>
+                            </select>
+                            <span style="font-size:0.85rem; font-weight:bold;">Nm &nbsp; Bingo in</span>
+                            <span class="bingo-plan-value" id="time-to-bingo" style="font-size:1rem; font-weight:bold;">--:--</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="bubble-v198">
                     <small style="font-weight:bold;">PAYLOAD</small><br>
-                    <span class="val-xl-v198" id="fly-ltr">--</span><span class="unit-xl">L</span>
+                    <span class="val-xl-v198" id="fly-ltr">--</span><span class="unit-xl">Liters</span>
                 </div>
             </div>
-
-
 
         </div>
         <!-- end left col -->
@@ -339,8 +336,8 @@
         <div class="ls-col-right" style="display:block;">
             <div class="ls-gauge-wrap gs-gauge-outer" style="position:relative;">
                 <div style="position:absolute; top:4px; left:6px; text-align:left; z-index:5;">
-                    <label style="font-size:0.5rem; font-weight:bold; display:block; line-height:1;">TARGET GS</label>
-                    <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:0.9rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 4px;"></select>
+                    <label style="font-size:0.75rem; font-weight:bold; display:block; line-height:1.2;">TARGET GS</label>
+                    <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:1rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 4px;"></select>
                 </div>
                 <svg id="gs-gauge-svg" viewBox="0 0 200 135" xmlns="http://www.w3.org/2000/svg">
                     <!-- Background arc (full sweep, grey) -->
@@ -789,7 +786,7 @@
         var burn = parseFloat(document.getElementById('burn-rate-select').value) || 800;
         var fuel = curFuel;
         var usable = fuel - BINGO_RESERVE;
-        var box = document.getElementById('calc-fuel-section');
+        var box = document.getElementById('fly-fuel-box') || document.getElementById('calc-fuel-section');
         var planSel = document.getElementById('fuel-plan-gs');
         var planVal = planSel ? planSel.value : '100';
         var planGS  = (planVal === 'actual') ? curGS : parseFloat(planVal);

@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V6.9</title>
+    <title>Tanking app V7.0</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -82,10 +82,13 @@
         .bingo-header-row { display: flex; align-items: center; justify-content: center; margin-bottom: 2px; }
         .bingo-title { font-size: 1.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
         .bingo-time-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-bottom: 6px; }
+        .bingo-endur-label { font-size: 0.75rem; font-weight: bold; color: #555; text-transform: uppercase; white-space: nowrap; }
         .bingo-time { font-size: 1.9rem; font-weight: bold; }
         .bingo-reserve { font-size: 0.75rem; color: #555; font-weight: bold; white-space: nowrap; }
-        .bingo-line { display: flex; flex-wrap: nowrap; align-items: baseline; gap: 10px; justify-content: center; }
-        .bingo-dist { font-size: clamp(0.9rem, 5vw, 1.6rem); font-weight: bold; flex: 1 1 0; min-width: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bingo-plan-row { display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 8px; }
+        .bingo-plan-label { font-size: clamp(0.75rem, 3.5vw, 0.95rem); font-weight: bold; white-space: nowrap; }
+        .bingo-plan-row select { font-size: clamp(0.85rem, 4vw, 1.05rem); font-weight: bold; border: 2px solid #000; border-radius: 4px; font-family: inherit; padding: 2px 4px; }
+        .bingo-plan-range { font-size: clamp(0.75rem, 3.5vw, 0.95rem); font-weight: bold; white-space: nowrap; }
 
         /* ── GS GAUGE ── */
         .gs-gauge-outer { width: 100%; display: flex; justify-content: center; align-items: center; }
@@ -121,6 +124,8 @@
         body.dark .bingo-box.warn { background: #7a6e00; color: #fff; }
         body.dark .bingo-box.warn-red { background: #8b1a00; color: #fff; }
         body.dark .bingo-reserve { color: #aaa; }
+        body.dark .bingo-endur-label { color: #aaa; }
+        body.dark .bingo-plan-row select { background: #2a2a2a; color: #f0f0f0; border-color: #555; }
         body.dark .dec-small { color: #aaa; }
         body.dark .timer-row { border-color: #555; }
         body.dark .timer-row[style*="background:#eef"] { background: #1e2535 !important; }
@@ -141,7 +146,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V6.9</h2>
+    <h2>Tanking app V7.0</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -285,23 +290,29 @@
                 </div>
             </div>
 
-            <!-- (2) FUEL ENDURANCE — single box, 2x size -->
+            <!-- (2) FUEL CALC — single box, 2x size -->
             <div class="bingo-row ls-bingo-row">
                 <div class="bingo-box" id="bingo-box">
                     <div class="bingo-header-row">
-                        <span class="bingo-title">FUEL ENDURANCE</span>
+                        <span class="bingo-title">FUEL CALC</span>
                     </div>
                     <div class="bingo-time-row">
+                        <span class="bingo-endur-label">ENDURANCE</span>
                         <span class="bingo-time" id="bingo-time">--h:--m</span>
                         <span class="bingo-reserve">(plus 500lbs)</span>
                     </div>
-                    <div class="bingo-line">
-                        <span class="bingo-dist"><span id="bingo-80-dist">--</span> Nm@80kts</span>
-                        <span class="bingo-dist"><span id="bingo-100-dist">--</span> Nm@100kts</span>
-                    </div>
-                    <div class="bingo-line">
-                        <span class="bingo-dist"><span id="bingo-110-dist">--</span> Nm@110kts</span>
-                        <span class="bingo-dist"><span id="bingo-gs-dist">--</span> Nm@<span id="bingo-gs-label">GS</span></span>
+                    <div class="bingo-plan-row">
+                        <span class="bingo-plan-label">Fuel Plan GS</span>
+                        <select id="fuel-plan-gs" onchange="saveFuelPlanGS(); updateBingo();">
+                            <option value="70">70kts</option>
+                            <option value="80">80kts</option>
+                            <option value="90">90kts</option>
+                            <option value="100">100kts</option>
+                            <option value="110">110kts</option>
+                            <option value="120">120kts</option>
+                            <option value="actual">ACTUAL</option>
+                        </select>
+                        <span class="bingo-plan-range">Range = <span id="bingo-range-dist">--</span>Nm</span>
                     </div>
                 </div>
             </div>
@@ -725,39 +736,47 @@
         a.click();
     }
 
-    // ── (2) Fuel Endurance Calculator ─────────────────────────────────────────
+    // ── (2) Fuel Calc ──────────────────────────────────────────────────────────
     // Endurance = time remaining before landing with 500 lbs reserve
     // usable fuel = curFuel - 500 (reserve)
     // time available = usable / burn_rate  (hours) -> shown as HHhr : MMmin
-    // distance @ 80kts and @ 100kts = time * speed  (nm)
+    // Range = time * planned GS (chosen via dropdown, or live GPS GS if "ACTUAL")
     // Box turns bright yellow once remaining fuel drops to 700 lbs or below.
     var BINGO_RESERVE = 500; // lbs
     var BINGO_WARN_RED = 500;    // lbs remaining → red
     var BINGO_WARN_YELLOW = 800; // lbs remaining → yellow
+
+    function saveFuelPlanGS() {
+        var sel = document.getElementById('fuel-plan-gs');
+        if (sel) localStorage.setItem('fuelPlanGS', sel.value);
+    }
+
+    function loadFuelPlanGS() {
+        var sel = document.getElementById('fuel-plan-gs');
+        if (!sel) return;
+        var saved = localStorage.getItem('fuelPlanGS');
+        if (saved) sel.value = saved;
+    }
 
     function updateBingo() {
         var burn = parseFloat(document.getElementById('burn-rate-select').value) || 800;
         var fuel = curFuel;
         var usable = fuel - BINGO_RESERVE;
         var box = document.getElementById('bingo-box');
+        var planSel = document.getElementById('fuel-plan-gs');
+        var planVal = planSel ? planSel.value : '100';
+        var planGS  = (planVal === 'actual') ? curGS : parseFloat(planVal);
 
         if (usable <= 0) {
-            document.getElementById('bingo-time').innerText     = '00h:00m';
-            document.getElementById('bingo-80-dist').innerText  = '0';
-            document.getElementById('bingo-100-dist').innerText = '0';
-            document.getElementById('bingo-110-dist').innerText = '0';
-            document.getElementById('bingo-gs-dist').innerText  = '0';
+            document.getElementById('bingo-time').innerText      = '00h:00m';
+            document.getElementById('bingo-range-dist').innerText = '0';
         } else {
             var hrs  = usable / burn;        // hours of flight remaining
             var mins = Math.round(hrs * 60); // total minutes
             var h    = Math.floor(mins / 60);
             var m    = mins % 60;
             document.getElementById('bingo-time').innerText = String(h).padStart(2,'0') + 'h:' + String(m).padStart(2,'0') + 'm';
-            document.getElementById('bingo-80-dist').innerText  = Math.round(hrs * 80);
-            document.getElementById('bingo-100-dist').innerText = Math.round(hrs * 100);
-            document.getElementById('bingo-110-dist').innerText = Math.round(hrs * 110);
-            document.getElementById('bingo-gs-dist').innerText  = Math.round(hrs * curGS);
-            document.getElementById('bingo-gs-label').innerText = Math.round(curGS) + 'kts';
+            document.getElementById('bingo-range-dist').innerText = Math.round(hrs * planGS);
         }
 
         if (fuel <= BINGO_WARN_RED) {
@@ -1119,6 +1138,7 @@
     // Default to 214B if nothing saved
     applyPreset('214B');
     updateWB();
+    loadFuelPlanGS();
     updateGSUI();
     updateBingo();
     applyLayoutMode();

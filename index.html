@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V6.8</title>
+    <title>Tanking app V6.9</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -79,12 +79,13 @@
         .bingo-box.warn { background: #ffeb00; }
         .bingo-box.warn-red { background: #ff3300; color: #fff; }
         .bingo-box.warn-red .bingo-reserve { color: #ffdddd; }
-        .bingo-header-row { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+        .bingo-header-row { display: flex; align-items: center; justify-content: center; margin-bottom: 2px; }
         .bingo-title { font-size: 1.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
-        .bingo-reserve { font-size: 0.85rem; color: #555; font-weight: bold; position: absolute; right: 0; top: 50%; transform: translateY(-50%); white-space: nowrap; }
-        .bingo-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px 16px; justify-content: center; }
-        .bingo-time { font-size: 1.4rem; font-weight: bold; flex: 0 0 auto; margin-left: 10px; }
-        .bingo-dist { font-size: 1.6rem; font-weight: bold; flex: 0 0 auto; }
+        .bingo-time-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-bottom: 6px; }
+        .bingo-time { font-size: 1.9rem; font-weight: bold; }
+        .bingo-reserve { font-size: 0.75rem; color: #555; font-weight: bold; white-space: nowrap; }
+        .bingo-line { display: flex; flex-wrap: nowrap; align-items: baseline; gap: 10px; justify-content: center; }
+        .bingo-dist { font-size: clamp(0.9rem, 5vw, 1.6rem); font-weight: bold; flex: 1 1 0; min-width: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* ── GS GAUGE ── */
         .gs-gauge-outer { width: 100%; display: flex; justify-content: center; align-items: center; }
@@ -140,7 +141,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V6.8</h2>
+    <h2>Tanking app V6.9</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -289,8 +290,10 @@
                 <div class="bingo-box" id="bingo-box">
                     <div class="bingo-header-row">
                         <span class="bingo-title">FUEL ENDURANCE</span>
+                    </div>
+                    <div class="bingo-time-row">
                         <span class="bingo-time" id="bingo-time">--h:--m</span>
-                        <span class="bingo-reserve">plus 500lb reserve</span>
+                        <span class="bingo-reserve">(plus 500lbs)</span>
                     </div>
                     <div class="bingo-line">
                         <span class="bingo-dist"><span id="bingo-80-dist">--</span> Nm@80kts</span>
@@ -321,7 +324,7 @@
                     <g id="gs-tick-group" stroke="#000" stroke-width="1.5"></g>
                     <!-- Scale labels: positioned above/outside their tick marks -->
                     <text x="8"   y="103"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-min-val">--</text>
-                    <text x="100" y="14"   text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-tgt-val">--</text>
+                    <text x="100" y="10"   text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-tgt-val">--</text>
                     <text x="192" y="103"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-max-val">--</text>
                     <!-- Digital speed readout -->
                     <text x="100" y="88" text-anchor="middle" font-size="48" font-weight="bold" fill="#000" id="fly-gs-svg">0</text>

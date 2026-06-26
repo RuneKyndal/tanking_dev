@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V6.6</title>
+    <title>Tanking app V6.7</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -83,7 +83,7 @@
         .bingo-title { font-size: 1.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
         .bingo-reserve { font-size: 0.85rem; color: #555; font-weight: bold; position: absolute; right: 0; top: 50%; transform: translateY(-50%); white-space: nowrap; }
         .bingo-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px 16px; justify-content: center; }
-        .bingo-time { font-size: 2.1rem; font-weight: bold; flex: 0 0 auto; }
+        .bingo-time { font-size: 1.4rem; font-weight: bold; flex: 0 0 auto; margin-left: 10px; }
         .bingo-dist { font-size: 1.6rem; font-weight: bold; flex: 0 0 auto; }
 
         /* ── GS GAUGE ── */
@@ -140,7 +140,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V6.6</h2>
+    <h2>Tanking app V6.7</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -233,13 +233,12 @@
 <!-- ── FLIGHT PAGE ── -->
 <div id="flight-page" class="page" style="flex-direction:column;">
 
-    <button id="wake-btn" onclick="toggleWakeLock()" style="position:absolute; top:8px; right:8px; z-index:30; height:34px; padding:0 10px; font-size:0.65rem; background:#333; color:#fff; border-color:#555;">☀ AWAKE</button>
-
     <!-- Top bar: [BACK | FUELBURN | GS TARGET] ... [GPS | PERMIT] -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; gap:4px;">
         <div style="display:flex; align-items:center; gap:4px;">
             <button style="background:#d9534f; color:#fff; height:50px; padding:0 12px; flex:0 0 auto;" onclick="leaveFlight()">BACK</button>
             <button id="dark-toggle-btn" style="height:50px; padding:0 10px; font-size:0.75rem; background:#333; color:#fff; border-color:#555;" onclick="toggleDark()">🌙 DARK</button>
+            <button id="wake-btn" onclick="toggleWakeLock()" style="height:50px; padding:0 10px; font-size:0.75rem; background:#333; color:#fff; border-color:#555;">☀ AWAKE</button>
             <div style="text-align:center; flex:0 0 auto;">
                 <label style="font-size:0.65rem; font-weight:bold; display:block;">FUELBURN lbs/hr</label>
                 <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:1rem; display:block; width:100%; border:2px solid #000; border-radius:4px; font-family:inherit;">
@@ -290,12 +289,16 @@
                 <div class="bingo-box" id="bingo-box">
                     <div class="bingo-header-row">
                         <span class="bingo-title">FUEL ENDURANCE</span>
+                        <span class="bingo-time" id="bingo-time">--h:--m</span>
                         <span class="bingo-reserve">plus 500lb reserve</span>
                     </div>
                     <div class="bingo-line">
-                        <span class="bingo-time" id="bingo-time">--h:--m</span>
                         <span class="bingo-dist"><span id="bingo-80-dist">--</span> Nm@80kts</span>
                         <span class="bingo-dist"><span id="bingo-100-dist">--</span> Nm@100kts</span>
+                    </div>
+                    <div class="bingo-line">
+                        <span class="bingo-dist"><span id="bingo-110-dist">--</span> Nm@110kts</span>
+                        <span class="bingo-dist"><span id="bingo-gs-dist">--</span> Nm@<span id="bingo-gs-label">GS</span></span>
                     </div>
                 </div>
             </div>
@@ -739,6 +742,8 @@
             document.getElementById('bingo-time').innerText     = '00h:00m';
             document.getElementById('bingo-80-dist').innerText  = '0';
             document.getElementById('bingo-100-dist').innerText = '0';
+            document.getElementById('bingo-110-dist').innerText = '0';
+            document.getElementById('bingo-gs-dist').innerText  = '0';
         } else {
             var hrs  = usable / burn;        // hours of flight remaining
             var mins = Math.round(hrs * 60); // total minutes
@@ -747,6 +752,9 @@
             document.getElementById('bingo-time').innerText = String(h).padStart(2,'0') + 'h:' + String(m).padStart(2,'0') + 'm';
             document.getElementById('bingo-80-dist').innerText  = Math.round(hrs * 80);
             document.getElementById('bingo-100-dist').innerText = Math.round(hrs * 100);
+            document.getElementById('bingo-110-dist').innerText = Math.round(hrs * 110);
+            document.getElementById('bingo-gs-dist').innerText  = Math.round(hrs * curGS);
+            document.getElementById('bingo-gs-label').innerText = Math.round(curGS) + 'kts';
         }
 
         if (fuel <= BINGO_WARN_RED) {

@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V6.5</title>
+    <title>Tanking app V6.6</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -140,7 +140,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V6.5</h2>
+    <h2>Tanking app V6.6</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -232,6 +232,8 @@
 
 <!-- ── FLIGHT PAGE ── -->
 <div id="flight-page" class="page" style="flex-direction:column;">
+
+    <button id="wake-btn" onclick="toggleWakeLock()" style="position:absolute; top:8px; right:8px; z-index:30; height:34px; padding:0 10px; font-size:0.65rem; background:#333; color:#fff; border-color:#555;">☀ AWAKE</button>
 
     <!-- Top bar: [BACK | FUELBURN | GS TARGET] ... [GPS | PERMIT] -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; gap:4px;">
@@ -463,7 +465,7 @@
             // Step 5: Hard navigate back to this same page — just strip any existing
             // query string and add a fresh bust token. No path manipulation needed.
             var cleanUrl = window.location.origin + window.location.pathname;
-            window.location.replace(cleanUrl + '?v=6.4&t=' + Date.now());
+            window.location.replace(cleanUrl + '?t=' + Date.now());
         }).catch(function(err) {
             console.warn('[Update] fallback reload, error:', err);
             // Last-resort: at minimum hard-reload
@@ -860,6 +862,8 @@
         burnRef = Date.now();
         applyLayoutMode();
         startGPS();
+        wakeWanted = true;
+        requestWakeLock();
 
         function loop() {
             var now  = Date.now();
@@ -883,8 +887,57 @@
 
     function leaveFlight() {
         stopGPS();
+        releaseWakeLock();
         showPage('timer-page');
     }
+
+    // ── Screen Wake Lock (iPad must not sleep while flying) ────────────────────
+    var wakeLock = null;
+    var wakeWanted = false;
+
+    function setWakeBtn(active) {
+        var btn = document.getElementById('wake-btn');
+        if (!btn) return;
+        btn.textContent  = active ? '☀ AWAKE' : '⏾ SLEEP OK';
+        btn.style.background = active ? '#28a745' : '#333';
+    }
+
+    function requestWakeLock() {
+        if (!('wakeLock' in navigator)) { setWakeBtn(false); return; }
+        navigator.wakeLock.request('screen').then(function(lock) {
+            wakeLock = lock;
+            setWakeBtn(true);
+            lock.addEventListener('release', function() {
+                wakeLock = null;
+                setWakeBtn(false);
+            });
+        }).catch(function() { setWakeBtn(false); });
+    }
+
+    function releaseWakeLock() {
+        wakeWanted = false;
+        if (wakeLock) { wakeLock.release(); wakeLock = null; }
+        setWakeBtn(false);
+    }
+
+    function toggleWakeLock() {
+        if (wakeLock) {
+            releaseWakeLock();
+        } else {
+            wakeWanted = true;
+            requestWakeLock();
+        }
+    }
+
+    // iOS/Android release the lock automatically when the page is backgrounded
+    // (app switch, screen lock). Silently re-acquire it once the flight page
+    // is visible again, if the pilot still wants it on.
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && wakeWanted && !wakeLock) {
+            requestWakeLock();
+        }
+    });
+
 
     // ── GPS ───────────────────────────────────────────────────────────────────
     function setGPSBtn(state, label) {

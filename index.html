@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V9.3</title>
+    <title>Tanking app V9.4</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -160,8 +160,9 @@
         body.dark .gs-tick-line { stroke: #ccc; }
         body.dark #toast { background: #444; }
         /* ── SETUP PAGE ── */
-        .setup-btn { width: 100%; padding: 18px 14px; font-size: 1.1rem; margin-bottom: 14px; border-radius: 10px; border: 2px solid #000; font-weight: bold; text-transform: uppercase; background: #f0f0f0; color: #000; text-align: left; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .setup-btn-icon { font-size: 1.4rem; flex-shrink: 0; }
+        .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .setup-btn { width: 100%; padding: 18px 10px; font-size: 0.95rem; border-radius: 10px; border: 2px solid #000; font-weight: bold; text-transform: uppercase; background: #f0f0f0; color: #000; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; min-height: 80px; }
+        .setup-btn-icon { font-size: 1.6rem; flex-shrink: 0; }
         .setup-section-label { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #888; margin: 18px 0 8px 2px; }
         body.dark .setup-btn { background: #2a2a2a; color: #f0f0f0; border-color: #555; }
         body.dark .setup-section-label { color: #888; }
@@ -426,30 +427,36 @@
     <h2>&#9881; SETUP</h2>
 
     <p class="setup-section-label">App</p>
-    <button class="setup-btn" onclick="showPage('manual-page')">
-        <span class="setup-btn-icon">&#9432;</span>
-        <span>Manual</span>
-    </button>
-    <button class="setup-btn" onclick="forceUpdate()">
-        <span class="setup-btn-icon">&#8635;</span>
-        <span>Update App</span>
-    </button>
+    <div class="setup-grid">
+        <button class="setup-btn" onclick="showPage('manual-page')">
+            <span class="setup-btn-icon">&#9432;</span>
+            <span>Manual</span>
+        </button>
+        <button class="setup-btn" onclick="forceUpdate()">
+            <span class="setup-btn-icon">&#8635;</span>
+            <span>Update App</span>
+        </button>
+    </div>
 
     <p class="setup-section-label">Display</p>
-    <button class="setup-btn" id="setup-dark-btn" onclick="toggleDark()">
-        <span class="setup-btn-icon">🌙</span>
-        <span id="setup-dark-label">Dark Mode</span>
-    </button>
-    <button class="setup-btn" id="setup-wake-btn" onclick="toggleWakeLock()">
-        <span class="setup-btn-icon">☀</span>
-        <span id="setup-wake-label">Keep Screen Awake</span>
-    </button>
+    <div class="setup-grid">
+        <button class="setup-btn" id="setup-dark-btn" onclick="toggleDark()">
+            <span class="setup-btn-icon">🌙</span>
+            <span id="setup-dark-label">Dark Mode</span>
+        </button>
+        <button class="setup-btn" id="setup-wake-btn" onclick="toggleWakeLock()">
+            <span class="setup-btn-icon">☀</span>
+            <span id="setup-wake-label">Keep Awake</span>
+        </button>
+    </div>
 
     <p class="setup-section-label">GPS</p>
-    <button class="setup-btn" onclick="forceGPSPermission()">
-        <span class="setup-btn-icon">&#128205;</span>
-        <span>GPS Permission</span>
-    </button>
+    <div class="setup-grid">
+        <button class="setup-btn" onclick="forceGPSPermission()">
+            <span class="setup-btn-icon">&#128205;</span>
+            <span>GPS Permission</span>
+        </button>
+    </div>
 
     <div style="height:20px;"></div>
     <button class="btn-nav" style="background:#444;" onclick="goBackFromSetup()">&#8592; BACK</button>
@@ -499,7 +506,7 @@
 
 <script>
     // ── App version — change this ONE line to update everywhere ───────────────
-    var APP_VERSION = 'V9.3';
+    var APP_VERSION = 'V9.4';
     document.getElementById('app-title').textContent = 'Tanking app ' + APP_VERSION;
     document.title = 'Tanking app ' + APP_VERSION;
     // ── Service Worker ────────────────────────────────────────────────────────
@@ -646,7 +653,7 @@
         var wakeLbl = document.getElementById('setup-wake-label');
         if (wakeBtn && wakeLbl) {
             var awake = !!wakeLock;
-            wakeLbl.textContent = awake ? 'Screen Awake (ON)' : 'Keep Screen Awake';
+            wakeLbl.textContent = awake ? 'Awake (ON)' : 'Keep Awake';
             wakeBtn.querySelector('.setup-btn-icon').textContent = awake ? '🔆' : '☀';
         }
     }

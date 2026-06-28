@@ -191,7 +191,7 @@
             <span class="fuel-label-text">FUEL</span>
             <div class="fuel-big-p1" id="fuel-display">2,750 lbs</div>
         </div>
-        <input type="range" id="fuel-slider" min="500" max="3000" step="50" value="2750" oninput="updateWB(); saveSettings();">
+        <input type="range" id="fuel-slider" min="0" max="3000" step="50" value="2750" oninput="updateWB(); saveSettings();">
     </div>
 
     <div class="bubble-v198">
@@ -297,7 +297,7 @@
                         <span class="unit-xl">Lbs</span>
                     </div>
                     <div style="height:6px;"></div>
-                    <input type="range" id="fly-fuel-slider" min="500" max="3000" step="50" oninput="curFuel=parseFloat(this.value); updateBingo();">
+                    <input type="range" id="fly-fuel-slider" min="0" max="3000" step="50" oninput="curFuel=parseFloat(this.value); updateBingo();">
                     <!-- ENDURANCE always visible, below slider — single constrained line -->
                     <div style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-top:10px; margin-bottom:2px; width:100%; overflow:hidden;">
                         <!-- ENDURANCE block -->
@@ -877,29 +877,23 @@
         var planVal = planSel ? planSel.value : '100';
         var planGS  = (planVal === 'actual') ? curGS : parseFloat(planVal);
 
-        if (usable <= 0) {
-            document.getElementById('bingo-time').innerText      = '00h:00m';
-            document.getElementById('bingo-range-dist').innerText = '0';
-            var rangeDup0 = document.getElementById('bingo-range-dist-dup');
-            if (rangeDup0) rangeDup0.innerText = '0';
-            var opEl0 = document.getElementById('op-endurance');
-            if (opEl0) opEl0.innerText = '00h:00m';
-        } else {
-            // TOTAL ENDURANCE = full fuel to empty (no reserve)
-            var hrsTotal  = fuel / burn;
-            var minsTotal = Math.round(hrsTotal * 60);
-            var hT = Math.floor(minsTotal / 60), mT = minsTotal % 60;
-            document.getElementById('bingo-time').innerText = String(hT).padStart(2,'0') + 'h:' + String(mT).padStart(2,'0') + 'm';
-            // OPERATIONAL ENDURANCE = fuel minus 500lb spare
-            var hrs  = usable / burn;
-            var mins = Math.round(hrs * 60);
-            var h = Math.floor(mins / 60), m = mins % 60;
-            var opEl = document.getElementById('op-endurance');
-            if (opEl) opEl.innerText = String(h).padStart(2,'0') + 'h:' + String(m).padStart(2,'0') + 'm';
-            document.getElementById('bingo-range-dist').innerText = Math.round(hrs * planGS);
-            var rangeDup1 = document.getElementById('bingo-range-dist-dup');
-            if (rangeDup1) rangeDup1.innerText = Math.round(hrs * planGS);
-        }
+        // ── TOTAL ENDURANCE: all fuel on board at burn rate (always calculated) ──
+        var hrsTotal  = fuel / burn;
+        var minsTotal = Math.round(hrsTotal * 60);
+        var hT = Math.floor(minsTotal / 60), mT = minsTotal % 60;
+        document.getElementById('bingo-time').innerText = String(hT).padStart(2,'0') + 'h:' + String(mT).padStart(2,'0') + 'm';
+
+        // ── OPERATIONAL ENDURANCE: fuel minus 500lb reserve, floors at 0 ─────
+        var opMins = Math.round(Math.max(0, usable) / burn * 60);
+        var hO = Math.floor(opMins / 60), mO = opMins % 60;
+        var opEl = document.getElementById('op-endurance');
+        if (opEl) opEl.innerText = String(hO).padStart(2,'0') + 'h:' + String(mO).padStart(2,'0') + 'm';
+
+        // ── Range (based on operational endurance) ────────────────────────────
+        var hrsOp = Math.max(0, usable) / burn;
+        document.getElementById('bingo-range-dist').innerText = Math.round(hrsOp * planGS);
+        var rangeDup1 = document.getElementById('bingo-range-dist-dup');
+        if (rangeDup1) rangeDup1.innerText = Math.round(hrsOp * planGS);
 
         // ── Time to Bingo ──────────────────────────────────────────────────────
         // How long you can still wait (burning fuel at the chosen burn rate)

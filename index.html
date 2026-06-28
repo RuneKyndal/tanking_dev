@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V8.5</title>
+    <title>Tanking app V8.6</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -166,7 +166,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V8.5</h2>
+    <h2>Tanking app V8.6</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -298,13 +298,14 @@
                     </div>
                     <div style="height:6px;"></div>
                     <input type="range" id="fly-fuel-slider" min="500" max="3000" step="50" oninput="curFuel=parseFloat(this.value); updateBingo();">
+                    <!-- ENDURANCE always visible, below slider -->
+                    <div style="display:flex; align-items:baseline; justify-content:center; gap:8px; margin-top:10px; margin-bottom:2px;">
+                        <span style="font-size:0.75rem; font-weight:bold; text-transform:uppercase;">ENDURANCE</span>
+                        <span id="bingo-time" style="font-size:2.3rem; font-weight:bold;">--h:--m</span>
+                        <span style="font-size:0.75rem; font-weight:bold;">(+500lbs rsv)</span>
+                    </div>
                     <!-- Fuel Calc items below slider, inside fuel box -->
-                    <div id="fuelcalc-items" style="margin-top:10px; border-top:1px solid #ccc; padding-top:8px;">
-                        <div style="display:flex; align-items:baseline; justify-content:center; gap:8px; margin-bottom:6px;">
-                            <span style="font-size:0.75rem; font-weight:bold; text-transform:uppercase;">ENDURANCE</span>
-                            <span id="bingo-time" style="font-size:2.3rem; font-weight:bold;">--h:--m</span>
-                            <span style="font-size:0.75rem; font-weight:bold;">(+500lbs rsv)</span>
-                        </div>
+                    <div id="fuelcalc-items" style="margin-top:6px; border-top:1px solid #ccc; padding-top:8px;">
                         <div id="fuelplan-row" style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:4px;">
                             <span style="font-size:0.85rem; font-weight:bold;">Fuel Plan GS</span>
                             <select id="fuel-plan-gs" onchange="saveFuelPlanGS(); updateBingo();" style="font-size:1.2rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 6px;">
@@ -1008,7 +1009,7 @@
         if (naturalH <= availH && naturalW <= availW) return; // already fits
 
         var scale = Math.min(availW / naturalW, availH / naturalH);
-        scale = Math.max(Math.min(scale, 1), 0.5); // clamp 0.5–1.0
+        scale = Math.max(Math.min(scale, 1), 0.4); // clamp 0.4–1.0
 
         // Fix the page at a known size/position, then scale it from its own
         // center. Using position:fixed + left/top 50% + translate(-50%,-50%)
@@ -1127,6 +1128,9 @@
     function applyFuelCalc(enabled) {
         document.body.classList.toggle('fuelcalc-off', !enabled);
         setFuelCalcBtn(enabled);
+        // Content height changed — rescale the active page so it still fits
+        // the screen with no scroll (matters most in landscape on iPad).
+        setTimeout(function() { if (typeof fitActivePage === 'function') fitActivePage(); }, 50);
     }
 
     function toggleFuelCalc() {

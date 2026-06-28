@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V9.1</title>
+    <title>Tanking app V9.2</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -106,10 +106,8 @@
         /* ── Preset button responsive labels ── */
         .label-portrait { display: inline; }
         .label-landscape { display: none; }
-        @media (orientation: landscape) {
-            .label-portrait { display: none; }
-            .label-landscape { display: inline; }
-        }
+        body.is-landscape .label-portrait { display: none; }
+        body.is-landscape .label-landscape { display: inline; }
 
         /* ── Fuel Calc toggle ── */
         body.fuelcalc-off #fuelcalc-items,
@@ -472,7 +470,7 @@
 
 <script>
     // ── App version — change this ONE line to update everywhere ───────────────
-    var APP_VERSION = 'V9.1';
+    var APP_VERSION = 'V9.2';
     document.getElementById('app-title').textContent = 'Tanking app ' + APP_VERSION;
     document.title = 'Tanking app ' + APP_VERSION;
     // ── Service Worker ────────────────────────────────────────────────────────
@@ -999,6 +997,9 @@
         var fuelPayload = document.querySelector('.ls-fuel-payload');
         var gaugeWrap   = document.querySelector('.ls-gauge-wrap');
         var gaugeSvg    = gaugeWrap ? gaugeWrap.querySelector('svg') : null;
+
+        // Phone portrait/landscape label swap — no width gate, just orientation
+        document.body.classList.toggle('is-landscape', window.innerWidth > window.innerHeight);
 
         if (isLandscape) {
             // Fuel + payload side by side to save vertical space

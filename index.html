@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V9.0</title>
+    <title>Tanking app V9.1</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -124,8 +124,6 @@
             .ls-gauge-wrap { width: 100% !important; }
             /* Range + Bingo numbers removed from the payload box in landscape */
             .ls-landscape-only { display: none !important; }
-            /* Aircraft type label scales to fill the space between the button groups */
-            #flight-ac-label { font-size: clamp(0.75rem, 2.6vw, 1.6rem) !important; }
         }
 
         /* ── DARK MODE ── */
@@ -264,7 +262,7 @@
             <button id="wake-btn" onclick="toggleWakeLock()" style="height:44px; padding:0 6px; font-size:0.65rem; background:#333; color:#fff; border-color:#555; flex-shrink:1;">☀ AWAKE</button>
             <button id="fuelcalc-btn" onclick="toggleFuelCalc()" style="height:44px; padding:0 6px; font-size:0.65rem; background:#333; color:#fff; border-color:#555; flex-shrink:1;">FUEL CALC</button>
         </div>
-        <div id="flight-ac-label" style="font-size:clamp(0.7rem, 4vw, 1.1rem); font-weight:bold; text-align:center; text-transform:uppercase; letter-spacing:1px; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 4px;">Bell 214B</div>
+        <div id="flight-ac-label" style="font-size:1.1rem; font-weight:bold; text-align:center; text-transform:uppercase; letter-spacing:1px; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 4px;">Bell 214B</div>
         <div style="display:flex; align-items:center; gap:3px; flex-shrink:1; min-width:0;">
             <button id="gps-btn" class="gps-off" style="height:44px; padding:0 6px; font-size:0.65rem; flex-shrink:1;" onclick="toggleGPS()">GPS OFF</button>
             <button id="gps-perm-btn" style="height:44px; padding:2px 5px; background:#444; color:#fff; font-size:0.6rem; flex-shrink:1;" onclick="forceGPSPermission()">PERMIT</button>
@@ -466,7 +464,7 @@
 
 <script>
     // ── App version — change this ONE line to update everywhere ───────────────
-    var APP_VERSION = 'V9.0';
+    var APP_VERSION = 'V9.1';
     document.getElementById('app-title').textContent = 'Tanking app ' + APP_VERSION;
     document.title = 'Tanking app ' + APP_VERSION;
     // ── Service Worker ────────────────────────────────────────────────────────
@@ -690,6 +688,7 @@
         // Update flight page aircraft label
         var lbl = document.getElementById('flight-ac-label');
         if (lbl) lbl.textContent = aircraft === '214ST' ? 'Bell 214ST' : 'Bell 214B';
+        fitAcLabel();
         updateWB();
         updateGSUI();
     }
@@ -1010,6 +1009,49 @@
         setTimeout(applyLayoutMode, 150);
     });
 
+    // ── (4b) Aircraft type label — dynamic shrink-to-fit ────────────────────
+    // The label sits between two button groups whose width varies with
+    // screen size, so a fixed/vw-based font-size can still get clipped on
+    // narrow phones. Instead, measure the actual space left over and shrink
+    // the font step-by-step (down to a floor) until the text fits without
+    // overflowing — works the same way in portrait and landscape.
+    var AC_LABEL_MAX_PX  = 18;   // starting (largest) font size in px
+    var AC_LABEL_MIN_PX  = 9;    // smallest size before we just let it ellipsis
+    var AC_LABEL_STEP_PX = 0.5;
+
+    function fitAcLabel() {
+        var lbl = document.getElementById('flight-ac-label');
+        if (!lbl) return;
+        var bar = lbl.parentElement;
+        if (!bar) return;
+
+        // Reset to max size first so we measure from a known starting point.
+        lbl.style.fontSize = AC_LABEL_MAX_PX + 'px';
+
+        // Available width = bar width minus the two button-group widths
+        // (and the gaps the flex container already applies between them).
+        var barRect = bar.getBoundingClientRect();
+        var siblings = bar.children;
+        var usedWidth = 0;
+        for (var i = 0; i < siblings.length; i++) {
+            if (siblings[i] === lbl) continue;
+            usedWidth += siblings[i].getBoundingClientRect().width;
+        }
+        var gapPx = parseFloat(getComputedStyle(bar).gap) || 0;
+        var availForLabel = barRect.width - usedWidth - (gapPx * (siblings.length - 1));
+
+        var size = AC_LABEL_MAX_PX;
+        // scrollWidth gives the text's natural (unwrapped) width at the
+        // current font-size, regardless of the element's own clipped width.
+        while (lbl.scrollWidth > availForLabel && size > AC_LABEL_MIN_PX) {
+            size -= AC_LABEL_STEP_PX;
+            lbl.style.fontSize = size + 'px';
+        }
+    }
+
+    window.addEventListener('resize',        function() { setTimeout(fitAcLabel, 0); });
+    window.addEventListener('orientationchange', function() { setTimeout(fitAcLabel, 200); });
+
     // ── (5) iPad / tablet no-scroll auto-fit ────────────────────────────────
     // Detects tablet-class screens (iPad and similar) and scales the active
     // page's inner content down just enough that it fits the viewport with
@@ -1084,6 +1126,7 @@
         document.getElementById('fly-fuel-slider').value = curFuel;
         burnRef = Date.now();
         applyLayoutMode();
+        setTimeout(fitAcLabel, 0);
         startGPS();
         wakeWanted = true;
         requestWakeLock();

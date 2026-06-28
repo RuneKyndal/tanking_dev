@@ -103,6 +103,14 @@
         #ttb-row-dup.warn-red .bingo-plan-label,
         #ttb-row-dup.warn-red .bingo-plan-value { color: #fff; }
 
+        /* ── Preset button responsive labels ── */
+        .label-portrait { display: inline; }
+        .label-landscape { display: none; }
+        @media (orientation: landscape) {
+            .label-portrait { display: none; }
+            .label-landscape { display: inline; }
+        }
+
         /* ── Fuel Calc toggle ── */
         body.fuelcalc-off #fuelcalc-items,
         body.fuelcalc-off #ls-range-bingo-dup { display: none !important; }
@@ -175,8 +183,8 @@
             <a class="btn-manual" href="#" onclick="forceUpdate(); return false;">&#8635; Update</a>
         </div>
         <div style="display:flex; gap:6px;">
-            <button class="btn-preset" onclick="applyPreset('214B')">Bell 214B</button>
-            <button class="btn-preset" onclick="applyPreset('214ST')">Bell 214ST</button>
+            <button class="btn-preset" onclick="applyPreset('214B')"><span class="label-portrait">214B</span><span class="label-landscape">Bell 214B</span></button>
+            <button class="btn-preset" onclick="applyPreset('214ST')"><span class="label-portrait">214ST</span><span class="label-landscape">Bell 214 ST</span></button>
             <button class="btn-preset" onclick="openUH60()">UH-60</button>
         </div>
     </div>

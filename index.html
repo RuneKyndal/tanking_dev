@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V8.1</title>
+    <title>Tanking app V8.2</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -162,7 +162,7 @@
 
 <!-- ── CALC PAGE ── -->
 <div id="calc-page" class="page">
-    <h2>Tanking app V8.1</h2>
+    <h2>Tanking app V8.2</h2>
 
     <div class="preset-row">
         <div style="display:flex; gap:6px;">
@@ -414,7 +414,7 @@
     <button onclick="showPage('timer-page')" style="background:#28a745; color:#fff; width:100%; padding:16px; margin-bottom:12px; border:2px solid #000; border-radius:8px; font-weight:bold;">BACK</button>
     <table class="log-table">
         <thead>
-            <tr><th>Date</th><th>Eng Block</th><th>HH:MM</th><th>Eng</th><th>Flt Block</th><th>HH:MM</th><th>Flt</th></tr>
+            <tr><th>Date</th><th>Reg</th><th>Eng Block</th><th>HH:MM</th><th>Eng</th><th>Flt Block</th><th>HH:MM</th><th>Flt</th></tr>
         </thead>
         <tbody id="log-body"></tbody>
     </table>
@@ -756,9 +756,16 @@
 
     // ── Save / Log ────────────────────────────────────────────────────────────
     function saveLog() {
+        var lastReg = localStorage.getItem('lastAcReg') || '';
+        var reg = prompt("Aircraft registration (e.g. N1234):", lastReg);
+        if (reg === null) reg = lastReg; // cancelled — keep previous default, don't block the save
+        reg = reg.trim().toUpperCase();
+        localStorage.setItem('lastAcReg', reg);
+
         var engMs = (timers.engG.end || (timers.engG.start ? Date.now() : 0)) - (timers.engG.start || 0);
         var entry = {
             date: new Date().toLocaleDateString(),
+            reg:  reg,
             eb:   document.getElementById('e-ts').innerText,
             ehms: formatShort(engMs),
             eh:   (engMs/3600000).toFixed(2),
@@ -777,18 +784,18 @@
         var log   = JSON.parse(localStorage.getItem('hLogV36') || '[]').reverse();
         var tbody = document.getElementById('log-body');
         tbody.innerHTML = '';
-        if (!log.length) { tbody.innerHTML = '<tr><td colspan="7">No logs.</td></tr>'; return; }
+        if (!log.length) { tbody.innerHTML = '<tr><td colspan="8">No logs.</td></tr>'; return; }
         var html = '', dailyE = 0, dailyF = 0, lastDate = log[0].date, dayHtml = '';
         log.forEach(function(e, i) {
             if (e.date !== lastDate) {
-                html += dayHtml + '<tr style="background:#f0f0f0;font-weight:bold;"><td colspan="3">TOTAL ' + lastDate + '</td><td>' + dailyE.toFixed(2) + '</td><td colspan="2"></td><td>' + dailyF.toFixed(2) + '</td></tr>';
+                html += dayHtml + '<tr style="background:#f0f0f0;font-weight:bold;"><td colspan="4">TOTAL ' + lastDate + '</td><td>' + dailyE.toFixed(2) + '</td><td colspan="2"></td><td>' + dailyF.toFixed(2) + '</td></tr>';
                 dayHtml = ''; dailyE = 0; dailyF = 0; lastDate = e.date;
             }
-            dayHtml += '<tr><td>' + e.date + '</td><td>' + e.eb + '</td><td>' + e.ehms + '</td><td>' + e.eh + '</td><td>' + e.fb + '</td><td>' + e.fhms + '</td><td>' + e.fh + '</td></tr>';
+            dayHtml += '<tr><td>' + e.date + '</td><td>' + (e.reg || '') + '</td><td>' + e.eb + '</td><td>' + e.ehms + '</td><td>' + e.eh + '</td><td>' + e.fb + '</td><td>' + e.fhms + '</td><td>' + e.fh + '</td></tr>';
             dailyE += parseFloat(e.eh);
             dailyF += parseFloat(e.fh);
             if (i === log.length - 1) {
-                html += dayHtml + '<tr style="background:#f0f0f0;font-weight:bold;"><td colspan="3">TOTAL ' + lastDate + '</td><td>' + dailyE.toFixed(2) + '</td><td colspan="2"></td><td>' + dailyF.toFixed(2) + '</td></tr>';
+                html += dayHtml + '<tr style="background:#f0f0f0;font-weight:bold;"><td colspan="4">TOTAL ' + lastDate + '</td><td>' + dailyE.toFixed(2) + '</td><td colspan="2"></td><td>' + dailyF.toFixed(2) + '</td></tr>';
             }
         });
         tbody.innerHTML = html;
@@ -807,12 +814,12 @@
         if (!log.length) { showToast("No logs found."); return; }
         var content, ext, mime;
         if (type === 'csv') {
-            content = "Date,Eng Block,Eng HHMM,Eng Dec,Flt Block,Flt HHMM,Flt Dec\n" +
-                log.map(function(e){return [e.date,e.eb,e.ehms,e.eh,e.fb,e.fhms,e.fh].join(',');}).join('\n');
+            content = "Date,Reg,Eng Block,Eng HHMM,Eng Dec,Flt Block,Flt HHMM,Flt Dec\n" +
+                log.map(function(e){return [e.date,(e.reg||''),e.eb,e.ehms,e.eh,e.fb,e.fhms,e.fh].join(',');}).join('\n');
             ext = ".csv"; mime = "text/csv";
         } else {
             content = "HELI LOG\n" +
-                log.map(function(e){return e.date+" | ENG: "+e.eb+" ["+e.ehms+"] ("+e.eh+"h) | FLT: "+e.fb+" ["+e.fhms+"] ("+e.fh+"h)";}).join('\n');
+                log.map(function(e){return e.date+(e.reg ? " ["+e.reg+"]" : "")+" | ENG: "+e.eb+" ["+e.ehms+"] ("+e.eh+"h) | FLT: "+e.fb+" ["+e.fhms+"] ("+e.fh+"h)";}).join('\n');
             ext = ".txt"; mime = "text/plain";
         }
         var a = document.createElement('a');

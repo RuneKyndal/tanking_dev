@@ -401,7 +401,7 @@
                     <g id="gs-tick-group" stroke="#000" stroke-width="1.5"></g>
                     <!-- Scale labels: min / max only (12 o'clock replaced by select) -->
                     <text x="8"   y="113" text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-min-val">--</text>
-                    <text x="192" y="113" text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-max-val">--</text>
+                    <text x="194" y="113" text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-max-val">--</text>
                     <!-- Digital speed readout -->
                     <text x="100" y="98" text-anchor="middle" font-size="48" font-weight="bold" fill="#000" id="fly-gs-svg">0</text>
                     <!-- Needle (pivot at 110) -->
@@ -410,7 +410,7 @@
                         <circle cx="100" cy="110" r="5" fill="#333"/>
                     </g>
                     <!-- 12 o'clock: select + TARGET GS label, tucked inside the arc top -->
-                    <foreignObject x="79" y="9" width="52" height="14">
+                    <foreignObject x="80" y="9" width="52" height="14">
                         <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
                             <select id="gs-target-select" onchange="updateGSUI(); saveSettings();"
                                 style="font-size:9px; font-weight:bold; border:none; background:transparent;
@@ -420,7 +420,7 @@
                             </select>
                         </div>
                     </foreignObject>
-                    <text x="135" y="21" text-anchor="start" font-size="6" font-weight="bold" fill="#555" font-family="Arial,sans-serif">TARGET GS</text>
+                    <text x="134" y="17" text-anchor="start" font-size="5" font-weight="bold" fill="#555" font-family="Arial,sans-serif">TARGET GS</text>
                 </svg>
             </div>
         </div>

@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app V9.5</title>
+    <title>Tanking app</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -107,7 +107,8 @@
         body.fuelcalc-off #fuelcalc-items,
         body.fuelcalc-off #ls-range-bingo-dup { display: none !important; }
 
-        body.dark #gs-target-select { background: transparent; color: #f0f0f0; border-color: transparent; }
+        select:focus { outline: none; box-shadow: none; -webkit-tap-highlight-color: transparent; }
+
 
         /* ── GS GAUGE ── */
         .gs-gauge-outer { width: 100%; display: flex; justify-content: center; align-items: center; }
@@ -515,7 +516,7 @@
 
 <script>
     // ── App version — change this ONE line to update everywhere ───────────────
-    var APP_VERSION = 'V9.5';
+    var APP_VERSION = 'V9.6';
     document.getElementById('app-title').textContent = 'Tanking app ' + APP_VERSION;
     document.title = 'Tanking app ' + APP_VERSION;
     // ── Service Worker ────────────────────────────────────────────────────────

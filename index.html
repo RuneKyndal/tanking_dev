@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app</title>
+    <title>Tanking app V9.4</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -107,9 +107,6 @@
         body.fuelcalc-off #fuelcalc-items,
         body.fuelcalc-off #ls-range-bingo-dup { display: none !important; }
 
-        select:focus { outline: none; box-shadow: none; -webkit-tap-highlight-color: transparent; }
-
-
         /* ── GS GAUGE ── */
         .gs-gauge-outer { width: 100%; display: flex; justify-content: center; align-items: center; }
         .gs-gauge-outer svg { width: 100%; height: auto; max-height: 38vh; display: block; }
@@ -169,6 +166,25 @@
         .setup-section-label { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #888; margin: 18px 0 8px 2px; }
         body.dark .setup-btn { background: #2a2a2a; color: #f0f0f0; border-color: #555; }
         body.dark .setup-section-label { color: #888; }
+
+        /* ── TANK CONNECTION (SETUP PAGE) ── */
+        .tank-panel { border: 2px solid #000; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+        body.dark .tank-panel { border-color: #555; }
+        .tank-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .tank-row input[type="text"] { flex: 1; border: 2px solid #000; border-radius: 6px; padding: 8px; font-size: 0.95rem; font-family: inherit; font-weight: bold; background: #f5f5f5; }
+        body.dark .tank-row input[type="text"] { background: #2a2a2a; color: #f0f0f0; border-color: #555; }
+        .tank-row button { flex: 0 0 auto; padding: 8px 16px; font-size: 0.85rem; background: #000; color: #fff; min-height: auto; }
+        .tank-row button.connected { background: #cc0000; }
+        .tank-status { font-size: 0.75rem; font-weight: bold; text-align: center; padding: 6px; border-radius: 6px; margin-bottom: 10px; background: #eee; color: #555; }
+        .tank-status.ok { background: #003300; color: #00cc00; }
+        .tank-status.bad { background: #330000; color: #ff6666; }
+        body.dark .tank-status { background: #2a2a2a; color: #aaa; }
+        .tank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .tank-card { border: 1px solid #000; border-radius: 6px; padding: 6px 8px; background: #f9f9f9; }
+        body.dark .tank-card { border-color: #555; background: #222; }
+        .tank-card .tc-label { font-size: 0.6rem; font-weight: bold; text-transform: uppercase; color: #888; }
+        .tank-card .tc-val { font-size: 1.2rem; font-weight: bold; }
+        .tank-card .tc-warn { font-size: 0.55rem; color: #e0a500; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -291,7 +307,7 @@
                 <div class="bubble-v198" id="fly-fuel-box" style="position:relative;">
                     <div style="position:absolute; top:4px; left:6px; text-align:left;">
                         <label style="font-size:0.75rem; font-weight:bold; display:block; line-height:1.2;">BURN lbs/hr</label>
-                        <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:1.2rem; font-weight:bold; border:none; background:transparent; font-family:inherit; padding:2px 2px;">
+                        <select id="burn-rate-select" onchange="updateBingo(); saveSettings();" style="font-size:1.2rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 6px;">
                             <option value="600">600</option><option value="650">650</option><option value="700">700</option>
                             <option value="750">750</option><option value="800">800</option><option value="850">850</option>
                             <option value="900">900</option><option value="950">950</option><option value="1000">1000</option>
@@ -390,38 +406,31 @@
         <!-- RIGHT COLUMN: GS gauge — sits BELOW the left column, full width, ~2x height -->
         <div class="ls-col-right" style="display:block;">
             <div class="ls-gauge-wrap gs-gauge-outer" style="position:relative;">
-                <svg id="gs-gauge-svg" viewBox="0 8 200 137" xmlns="http://www.w3.org/2000/svg">
+                <div style="position:absolute; top:4px; left:6px; text-align:left; z-index:5;">
+                    <label style="font-size:0.75rem; font-weight:bold; display:block; line-height:1.2;">TARGET GS</label>
+                    <select id="gs-target-select" onchange="updateGSUI(); saveSettings();" style="font-size:1.2rem; font-weight:bold; border:2px solid #000; border-radius:4px; font-family:inherit; padding:2px 6px;"></select>
+                </div>
+                <svg id="gs-gauge-svg" viewBox="0 0 200 135" xmlns="http://www.w3.org/2000/svg">
                     <!-- Background arc (full sweep, grey) -->
-                    <path d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="#ddd" stroke-width="14" stroke-linecap="round"/>
+                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#ddd" stroke-width="14" stroke-linecap="round"/>
                     <!-- Yellow arc (full sweep) -->
-                    <path d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="#ffcc00" stroke-width="14" stroke-linecap="round"/>
+                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#ffcc00" stroke-width="14" stroke-linecap="round"/>
                     <!-- Green zone: centre ±3 kts (±27°) -->
-                    <path id="gs-green-arc"  d="M 100 30 A 80 80 0 0 1 143.2 41.8" fill="none" stroke="#00cc44" stroke-width="14" transform="rotate(-27 100 110)"/>
-                    <path id="gs-green-arc2" d="M 100 30 A 80 80 0 0 0  56.8 41.8" fill="none" stroke="#00cc44" stroke-width="14" transform="rotate(27 100 110)"/>
+                    <path id="gs-green-arc" d="M 100 20 A 80 80 0 0 1 143.2 31.8" fill="none" stroke="#00cc44" stroke-width="14" transform="rotate(-27 100 100)"/>
+                    <path id="gs-green-arc2" d="M 100 20 A 80 80 0 0 0 56.8 31.8" fill="none" stroke="#00cc44" stroke-width="14" transform="rotate(27 100 100)"/>
                     <!-- Tick marks -->
                     <g id="gs-tick-group" stroke="#000" stroke-width="1.5"></g>
-                    <!-- Scale labels: min / max only (12 o'clock replaced by select) -->
-                    <text x="8"   y="113" text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-min-val">--</text>
-                    <text x="194" y="113" text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-max-val">--</text>
+                    <!-- Scale labels: positioned above/outside their tick marks -->
+                    <text x="8"   y="103"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-min-val">--</text>
+                    <text x="100" y="10"   text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-tgt-val">--</text>
+                    <text x="192" y="103"  text-anchor="middle" font-size="9" font-weight="bold" fill="#000" id="gs-max-val">--</text>
                     <!-- Digital speed readout -->
-                    <text x="100" y="98" text-anchor="middle" font-size="48" font-weight="bold" fill="#000" id="fly-gs-svg">0</text>
-                    <!-- Needle (pivot at 110) -->
-                    <g id="needle-group" style="transform:rotate(0deg); transform-origin:100px 110px; transition:transform 0.2s linear;">
-                        <line x1="100" y1="110" x2="100" y2="30" stroke="#333" stroke-width="3" stroke-linecap="round"/>
-                        <circle cx="100" cy="110" r="5" fill="#333"/>
+                    <text x="100" y="88" text-anchor="middle" font-size="48" font-weight="bold" fill="#000" id="fly-gs-svg">0</text>
+                    <!-- Needle -->
+                    <g id="needle-group" style="transform:rotate(0deg); transform-origin:100px 100px; transition:transform 0.2s linear;">
+                        <line x1="100" y1="100" x2="100" y2="20" stroke="#333" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="100" cy="100" r="5" fill="#333"/>
                     </g>
-                    <!-- 12 o'clock: select + TARGET GS label, tucked inside the arc top -->
-                    <foreignObject x="80" y="9" width="52" height="14">
-                        <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-                            <select id="gs-target-select" onchange="updateGSUI(); saveSettings();"
-                                style="font-size:9px; font-weight:bold; border:none; background:transparent;
-                                       font-family:Arial,sans-serif; padding:0; margin:0; cursor:pointer;
-                                       color:#000; text-align:center; text-align-last:center;
-                                       width:100%; -webkit-appearance:auto; appearance:auto;">
-                            </select>
-                        </div>
-                    </foreignObject>
-                    <text x="134" y="17" text-anchor="start" font-size="5" font-weight="bold" fill="#555" font-family="Arial,sans-serif">TARGET GS</text>
                 </svg>
             </div>
         </div>
@@ -466,6 +475,16 @@
             <span class="setup-btn-icon">&#128205;</span>
             <span>GPS Permission</span>
         </button>
+    </div>
+
+    <p class="setup-section-label">Tank Connection (Test)</p>
+    <div class="tank-panel">
+        <div class="tank-row">
+            <input type="text" id="tank-ip" value="192.168.1.3" placeholder="Tank IP" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button id="tank-connect-btn" onclick="toggleTankConnection()">Connect</button>
+        </div>
+        <div id="tank-status" class="tank-status">Not connected</div>
+        <div class="tank-grid" id="tank-grid"></div>
     </div>
 
     <div style="height:20px;"></div>
@@ -516,7 +535,7 @@
 
 <script>
     // ── App version — change this ONE line to update everywhere ───────────────
-    var APP_VERSION = 'V9.6';
+    var APP_VERSION = 'V9.4';
     document.getElementById('app-title').textContent = 'Tanking app ' + APP_VERSION;
     document.title = 'Tanking app ' + APP_VERSION;
     // ── Service Worker ────────────────────────────────────────────────────────
@@ -668,6 +687,137 @@
         }
     }
 
+
+    // ── Tank Connection (Test) ───────────────────────────────────────────────
+    // Speaks the Helitak unit's Socket.IO 0.9 protocol directly (no library):
+    //   1. GET  http://<ip>/socket.io/1/            -> "<sid>:<hbTimeout>:<closeTimeout>:<transports>"
+    //   2. WS   ws://<ip>/socket.io/1/websocket/<sid>
+    //   3. send 5:::{"name":"getdata","args":["<channel>"]}   every ~1s
+    //   4. recv 5:::{"name":"data","args":["[{\"Id\":..,\"Value\":..}, ...]"]}
+    //
+    // NOTE: TANK_CHANNEL is the hash from this unit's JS filename
+    // (IO_RemoteL_<hash>.js). A different Helitak unit will have a different
+    // hash - update it below if needed.
+    //
+    // NOTE: TANK_FIELD_MAP below maps each Analog Input to its Id. Only the
+    // Water Level - Raw Id was confirmed against a live capture; the rest were
+    // inferred by value-matching against a screenshot taken at a different
+    // moment and are marked unverified until checked against a live unit.
+    var TANK_CHANNEL = 'be5bb978cbaa49e48b0ef66b72e2f267';
+    var TANK_FIELD_MAP = [
+        { id: '1802000', label: 'Air Pressure - Raw',           unverified: true },
+        { id: '1802996', label: 'Air Pressure - Scaled (kPa)',  unverified: true },
+        { id: '1802004', label: 'Door Pressure - Raw',          unverified: true },
+        { id: '1803010', label: 'Door Pressure - Scaled (kPa)', unverified: true },
+        { id: '1802008', label: 'Water Level - Raw',            unverified: false },
+        { id: '1803417', label: 'Water Level - Scaled (%)',     unverified: true },
+        { id: '1802012', label: 'Door Position - Raw',          unverified: true },
+        { id: '1802992', label: 'Door Position - Scaled (deg)', unverified: true }
+    ];
+
+    var tankSocket = null, tankPollTimer = null;
+
+    function buildTankGrid() {
+        var grid = document.getElementById('tank-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        TANK_FIELD_MAP.forEach(function(f) {
+            var card = document.createElement('div');
+            card.className = 'tank-card';
+            card.id = 'tc-' + f.id;
+            card.innerHTML = '<div class="tc-label">' + f.label + '</div>' +
+                              '<div class="tc-val">—</div>' +
+                              (f.unverified ? '<div class="tc-warn">⚠ unverified</div>' : '');
+            grid.appendChild(card);
+        });
+    }
+
+    function setTankStatus(cls, text) {
+        var el = document.getElementById('tank-status');
+        el.className = 'tank-status' + (cls ? ' ' + cls : '');
+        el.textContent = text;
+    }
+
+    function toggleTankConnection() {
+        if (tankSocket) { disconnectTank(); } else { connectTank(); }
+    }
+
+    function connectTank() {
+        var ip = document.getElementById('tank-ip').value.trim();
+        if (!ip) { showToast('Enter the tank IP'); return; }
+
+        var btn = document.getElementById('tank-connect-btn');
+        btn.disabled = true;
+        setTankStatus('', 'Connecting…');
+
+        fetch('http://' + ip + '/socket.io/1/?t=' + Date.now())
+            .then(function(resp) { return resp.text(); })
+            .then(function(text) {
+                var sid = text.split(':')[0];
+                openTankSocket(ip, sid);
+            })
+            .catch(function(err) {
+                setTankStatus('bad', 'Connection failed');
+                showToast('Tank connection failed: ' + err.message);
+                btn.disabled = false;
+            });
+    }
+
+    function openTankSocket(ip, sid) {
+        var wsUrl = 'ws://' + ip + '/socket.io/1/websocket/' + sid;
+        tankSocket = new WebSocket(wsUrl);
+        var btn = document.getElementById('tank-connect-btn');
+
+        tankSocket.onopen = function() {
+            setTankStatus('ok', 'Connected to ' + ip);
+            btn.textContent = 'Disconnect';
+            btn.classList.add('connected');
+            btn.disabled = false;
+            tankPollTimer = setInterval(function() {
+                if (tankSocket && tankSocket.readyState === WebSocket.OPEN) {
+                    tankSocket.send('5:::{"name":"getdata","args":["' + TANK_CHANNEL + '"]}');
+                }
+            }, 1000);
+        };
+
+        tankSocket.onmessage = function(evt) {
+            var frame = evt.data;
+            if (typeof frame !== 'string' || frame.indexOf('5:::') !== 0) return;
+            try {
+                var payload = JSON.parse(frame.slice(4));
+                if (payload.name !== 'data') return;
+                var arr = JSON.parse(payload.args[0]);
+                var values = {};
+                arr.forEach(function(item) { values[item.Id] = item.Value; });
+                TANK_FIELD_MAP.forEach(function(f) {
+                    var card = document.getElementById('tc-' + f.id);
+                    if (!card) return;
+                    var v = values[f.id];
+                    card.querySelector('.tc-val').textContent = (v === undefined) ? '—' : v;
+                });
+            } catch (e) { /* ignore malformed frame */ }
+        };
+
+        tankSocket.onerror = function() {
+            setTankStatus('bad', 'Connection error');
+        };
+
+        tankSocket.onclose = function() {
+            clearInterval(tankPollTimer);
+            tankSocket = null;
+            btn.textContent = 'Connect';
+            btn.classList.remove('connected');
+            btn.disabled = false;
+            setTankStatus('', 'Not connected');
+        };
+    }
+
+    function disconnectTank() {
+        if (tankSocket) tankSocket.close();
+        clearInterval(tankPollTimer);
+    }
+
+    buildTankGrid();
 
     // ── Toast ─────────────────────────────────────────────────────────────────
     function showToast(msg, duration) {
@@ -1369,17 +1519,17 @@
     // ── GS gauge ──────────────────────────────────────────────────────────────
     // Arc: center radius=80, stroke-width=14, so outer edge = 80-7=73 from center (r=73), inner edge = 80+7=87 from center (r=87)
     // In SVG coords: center is (100,100), top of arc outer edge is y=100-73=27, inner edge y=100-87=13
-    // Ticks should span only the arc band: from r=73 (outer) to r=87 (inner), pivot at y=110
+    // Ticks should span only the arc band: from r=73 (outer) to r=87 (inner), i.e. y=27 to y=13
     (function drawGSTicks() {
         var g = document.getElementById('gs-tick-group');
         if (!g) return;
         for (var i = -90; i <= 90; i += 9) {
             var l = document.createElementNS('http://www.w3.org/2000/svg','line');
-            l.setAttribute('x1','100'); l.setAttribute('y1','23');
-            l.setAttribute('x2','100'); l.setAttribute('y2','37');
+            l.setAttribute('x1','100'); l.setAttribute('y1','13');
+            l.setAttribute('x2','100'); l.setAttribute('y2','27');
             l.setAttribute('stroke','#000');
             l.setAttribute('stroke-width','1.5');
-            l.setAttribute('transform','rotate('+i+' 100 110)');
+            l.setAttribute('transform','rotate('+i+' 100 100)');
             g.appendChild(l);
         }
     })();
@@ -1387,6 +1537,7 @@
     function updateGSUI() {
         var tgt = parseFloat(document.getElementById('gs-target-select').value);
         document.getElementById('gs-min-val').textContent = Math.max(0, tgt - 10);
+        document.getElementById('gs-tgt-val').textContent = tgt;
         document.getElementById('gs-max-val').textContent = tgt + 10;
         document.getElementById('fly-gs-svg').textContent = Math.round(curGS);
         var diff = curGS - tgt;
@@ -1420,7 +1571,7 @@
         var svgColor = isDark ? '#e0e0e0' : '#000';
         var ticks = document.getElementById('gs-tick-group');
         if (ticks) Array.from(ticks.querySelectorAll('line')).forEach(function(l) { l.setAttribute('stroke', svgColor); });
-        ['gs-min-val','gs-max-val'].forEach(function(id) { var el = document.getElementById(id); if (el) el.setAttribute('fill', svgColor); });
+        ['gs-min-val','gs-tgt-val','gs-max-val'].forEach(function(id) { var el = document.getElementById(id); if (el) el.setAttribute('fill', svgColor); });
         var needle = document.querySelector('#needle-group line');
         var needleDot = document.querySelector('#needle-group circle');
         var nc = isDark ? '#ccc' : '#333';

@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="tank.png">
     <link rel="manifest" href="manifest.json">
-    <title>Tanking app</title>
+    <title>Tanking app V8.9</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
         body {
@@ -52,9 +52,6 @@
 
         input[type="range"] { -webkit-appearance: none; width: 100%; height: 20px; background: #ddd; border-radius: 10px; outline: none; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 44px; height: 44px; background: #000; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px #000; }
-        input[type="range"].slider-compact { height: 12px; }
-        input[type="range"].slider-compact::-webkit-slider-thumb { width: 28px; height: 28px; border-width: 2px; }
-        body.dark input[type="range"].slider-compact::-webkit-slider-thumb { box-shadow: 0 0 0 1px #888; }
 
         .log-table { width: 100%; border-collapse: collapse; font-size: 0.65rem; margin-top: 10px; }
         .log-table th, .log-table td { border: 1px solid #000; padding: 4px 2px; text-align: center; }
@@ -162,13 +159,7 @@
         body.dark #gs-gauge-svg path[stroke="#ddd"] { stroke: #444; }
         body.dark .gs-tick-line { stroke: #ccc; }
         body.dark #toast { background: #444; }
-        /* ── SETUP PAGE ── */
-        .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .setup-btn { width: 100%; padding: 18px 10px; font-size: 0.95rem; border-radius: 10px; border: 2px solid #000; font-weight: bold; text-transform: uppercase; background: #f0f0f0; color: #000; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; min-height: 80px; }
-        .setup-btn-icon { font-size: 1.6rem; flex-shrink: 0; }
-        .setup-section-label { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #888; margin: 18px 0 8px 2px; }
-        body.dark .setup-btn { background: #2a2a2a; color: #f0f0f0; border-color: #555; }
-        body.dark .setup-section-label { color: #888; }
+        /* Dark mode SVG text/needle colors handled via JS */
     </style>
 </head>
 <body>
@@ -178,12 +169,13 @@
     <h2 id="app-title"></h2>
 
     <div class="preset-row">
-        <div style="display:flex; gap:6px; align-items:center;">
-            <button class="btn-preset" style="background:#444; color:#fff; padding:12px 14px;" onclick="showPage('setup-page')">&#9881; SETUP</button>
+        <div style="display:flex; gap:6px;">
+            <a class="btn-manual" href="#" onclick="showPage('manual-page'); return false;">&#9432; Manual</a>
+            <a class="btn-manual" href="#" onclick="forceUpdate(); return false;">&#8635; Update</a>
         </div>
         <div style="display:flex; gap:6px;">
             <button class="btn-preset" onclick="applyPreset('214B')">Bell 214B</button>
-            <button class="btn-preset" onclick="applyPreset('214ST')">Bell 214 ST</button>
+            <button class="btn-preset" onclick="applyPreset('214ST')">Bell 214ST</button>
             <button class="btn-preset" onclick="openUH60()">UH-60</button>
         </div>
     </div>
@@ -249,7 +241,7 @@
     </div>
 
     <div style="display:flex; gap:5px; margin-top:10px;">
-        <button style="background:#444; color:#fff; flex:1.5; height:50px;" onclick="goBack()">BACK</button>
+        <button style="background:#444; color:#fff; flex:1.5; height:50px;" onclick="showPage('calc-page')">BACK</button>
         <button style="background:#007bff; color:#fff; flex:1; height:50px;" onclick="saveLog()">SAVE</button>
         <button style="background:#666; color:#fff; flex:1; height:50px;" onclick="showLog()">LOGS</button>
     </div>
@@ -261,16 +253,18 @@
 <!-- ── FLIGHT PAGE ── -->
 <div id="flight-page" class="page" style="flex-direction:column;">
 
-    <!-- Top bar: [BACK | SETUP | FUELBURN] ... [AC LABEL] ... [GPS] -->
+    <!-- Top bar: [BACK | FUELBURN | GS TARGET] ... [GPS | PERMIT] -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; gap:3px; width:100%;">
         <div style="display:flex; align-items:center; gap:3px; flex-shrink:1; min-width:0;">
             <button style="background:#d9534f; color:#fff; height:44px; padding:0 7px; font-size:0.65rem; flex-shrink:0;" onclick="leaveFlight()">BACK</button>
-            <button style="background:#444; color:#fff; height:44px; padding:0 7px; font-size:0.65rem; flex-shrink:0;" onclick="showPage('setup-page')">&#9881; SETUP</button>
-            <button id="fuelcalc-btn" onclick="toggleFuelCalc()" style="height:44px; padding:0 6px; font-size:0.65rem; background:#333; color:#fff; border-color:#555; flex-shrink:1;">BINGO CALC</button>
+            <button id="dark-toggle-btn" style="height:44px; padding:0 6px; font-size:0.65rem; background:#333; color:#fff; border-color:#555; flex-shrink:1;" onclick="toggleDark()">🌙 DARK</button>
+            <button id="wake-btn" onclick="toggleWakeLock()" style="height:44px; padding:0 6px; font-size:0.65rem; background:#333; color:#fff; border-color:#555; flex-shrink:1;">☀ AWAKE</button>
+            <button id="fuelcalc-btn" onclick="toggleFuelCalc()" style="height:44px; padding:0 6px; font-size:0.65rem; background:#333; color:#fff; border-color:#555; flex-shrink:1;">FUEL CALC</button>
         </div>
         <div id="flight-ac-label" style="font-size:1rem; font-weight:bold; text-align:center; text-transform:uppercase; letter-spacing:1px; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 4px;">Bell 214B</div>
         <div style="display:flex; align-items:center; gap:3px; flex-shrink:1; min-width:0;">
             <button id="gps-btn" class="gps-off" style="height:44px; padding:0 6px; font-size:0.65rem; flex-shrink:1;" onclick="toggleGPS()">GPS OFF</button>
+            <button id="gps-perm-btn" style="height:44px; padding:2px 5px; background:#444; color:#fff; font-size:0.6rem; flex-shrink:1;" onclick="forceGPSPermission()">PERMIT</button>
         </div>
     </div>
 
@@ -425,164 +419,15 @@
 
 </div>
 
-<!-- ── SETUP PAGE ── -->
-<div id="setup-page" class="page">
-    <h2>&#9881; SETUP</h2>
-
-    <p class="setup-section-label">App</p>
-    <div class="setup-grid">
-        <button class="setup-btn" onclick="showPage('manual-page')">
-            <span class="setup-btn-icon">&#9432;</span>
-            <span>Manual</span>
-        </button>
-        <button class="setup-btn" onclick="forceUpdate()">
-            <span class="setup-btn-icon">&#8635;</span>
-            <span>Update App</span>
-        </button>
-    </div>
-
-    <p class="setup-section-label">Tools</p>
-    <div class="setup-grid">
-        <button class="setup-btn" onclick="openRefuelCalc()">
-            <span class="setup-btn-icon">&#9981;</span>
-            <span>Refuel Calc</span>
-        </button>
-        <button class="setup-btn" onclick="openAeronetCalc()">
-            <span class="setup-btn-icon">&#9981;</span>
-            <span>Aeronet</span>
-        </button>
-    </div>
-
-    <p class="setup-section-label">Display</p>
-    <div class="setup-grid">
-        <button class="setup-btn" id="setup-dark-btn" onclick="toggleDark()">
-            <span class="setup-btn-icon">🌙</span>
-            <span id="setup-dark-label">Dark Mode</span>
-        </button>
-        <button class="setup-btn" id="setup-wake-btn" onclick="toggleWakeLock()">
-            <span class="setup-btn-icon">☀</span>
-            <span id="setup-wake-label">Keep Awake</span>
-        </button>
-    </div>
-
-    <p class="setup-section-label">GPS</p>
-    <div class="setup-grid">
-        <button class="setup-btn" onclick="forceGPSPermission()">
-            <span class="setup-btn-icon">&#128205;</span>
-            <span>GPS Permission</span>
-        </button>
-    </div>
-
-    <div style="height:20px;"></div>
-    <button class="btn-nav" style="background:#444;" onclick="goBack()">&#8592; BACK</button>
-</div>
-<!-- ── REFUEL CALC PAGE ── -->
-<div id="refuel-page" class="page">
-    <h2>&#9981; REFUEL CALC</h2>
-
-    <div class="fuel-section">
-        <div class="fuel-header-row">
-            <span class="fuel-label-text">DESIRED FUEL</span>
-            <div class="fuel-big-p1" id="refuel-desired-display">-- lbs</div>
-        </div>
-        <input type="range" id="refuel-desired-slider" min="0" max="3000" step="50" value="0" oninput="updateRefuelCalc()">
-    </div>
-
-    <div class="fuel-section">
-        <div class="fuel-header-row">
-            <span class="fuel-label-text">ACTUAL FUEL (IN TANK)</span>
-            <div class="fuel-big-p1" id="refuel-actual-display">-- lbs</div>
-        </div>
-        <input type="range" id="refuel-actual-slider" min="0" max="3000" step="50" value="0" oninput="updateRefuelCalc()">
-    </div>
-
-    <div class="bubble-v198">
-        <div style="background:#000; color:#fff; padding:4px; font-size:0.8rem; margin-bottom:5px; font-weight:bold;">FUEL REQUIRED</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr;">
-            <div><small style="font-weight:bold;">LBS</small><div id="refuel-req-lbs" style="font-size:1.8rem; font-weight:bold;">--</div></div>
-            <div style="border-left:1px solid #ddd;"><small style="font-weight:bold;">LITERS</small><div id="refuel-req-liters" style="font-size:1.8rem; font-weight:bold;">--</div></div>
-        </div>
-        <div style="font-size:0.65rem; color:#888; text-align:center; margin-top:6px;">Jet-A @ 20&deg;C, 0.800 kg/L</div>
-    </div>
-
-    <div style="border-top:1px solid #ccc; margin-top:20px; padding-top:16px;">
-        <div class="fuel-section">
-            <div style="text-align:center; font-weight:bold; margin-bottom:10px;">LBS to Liters converter</div>
-            <div class="fuel-header-row">
-                <span class="fuel-label-text">LBS &#8596; LITERS</span>
-                <div class="fuel-big-p1" id="lbsltr-display">0 lbs</div>
-            </div>
-            <input type="range" id="lbsltr-slider" min="0" max="3000" step="50" value="0" oninput="updateLbsLtr()">
-            <div class="fuel-big-p1" style="text-align:center; margin-top:6px;" id="lbsltr-liters-display">0 L</div>
-        </div>
-    </div>
-
-    <button style="background:#444; color:#fff; width:100%; padding:14px; border:none; border-radius:0; font-weight:bold; font-size:1rem; margin-top:20px;" onclick="goBack()">&#8592; BACK</button>
-</div>
-
-<!-- ── AERONET DAILY FUEL INPUT PAGE ── -->
-<div id="aeronet-page" class="page">
-    <h2>&#9981; Aeronet daily fuel input</h2>
-
-    <div class="fuel-section">
-        <div style="text-align:center; font-weight:bold; margin-bottom:6px;">Start of Day fuel</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; margin-bottom:4px;">
-            <div style="text-align:center;"><small style="font-weight:bold;">LBS</small><div class="fuel-big-p1" id="aeronet-start-lbs">0</div></div>
-            <div style="text-align:center; border-left:1px solid #ccc;"><small style="font-weight:bold;">LITERS</small><div class="fuel-big-p1" id="aeronet-start-liters">0</div></div>
-        </div>
-        <input type="range" class="slider-compact" id="aeronet-start-slider" min="0" max="3000" step="50" value="0" oninput="updateAeronetFuel()">
-    </div>
-
-    <div class="fuel-section" style="margin-top:8px;">
-        <div style="text-align:center; font-weight:bold; margin-bottom:6px;">End of Day Fuel</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; margin-bottom:4px;">
-            <div style="text-align:center;"><small style="font-weight:bold;">LBS</small><div class="fuel-big-p1" id="aeronet-end-lbs">0</div></div>
-            <div style="text-align:center; border-left:1px solid #ccc;"><small style="font-weight:bold;">LITERS</small><div class="fuel-big-p1" id="aeronet-end-liters">0</div></div>
-        </div>
-        <input type="range" class="slider-compact" id="aeronet-end-slider" min="0" max="3000" step="50" value="0" oninput="updateAeronetFuel()">
-    </div>
-
-    <div style="border-top:1px solid #ccc; margin-top:10px; padding-top:8px;">
-        <div style="text-align:center; font-weight:bold; margin-bottom:6px;">fuel Added (LITERS)</div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <label style="font-weight:bold;">Fuel 1</label>
-            <input type="number" inputmode="numeric" id="aeronet-fuel1" min="0" step="1" value="0" oninput="updateAeronetTotal()" style="width:110px; padding:6px; font-size:1.1rem; text-align:right; border:1px solid #ccc; border-radius:6px;">
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <label style="font-weight:bold;">Fuel 2</label>
-            <input type="number" inputmode="numeric" id="aeronet-fuel2" min="0" step="1" value="0" oninput="updateAeronetTotal()" style="width:110px; padding:6px; font-size:1.1rem; text-align:right; border:1px solid #ccc; border-radius:6px;">
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <label style="font-weight:bold;">Fuel 3</label>
-            <input type="number" inputmode="numeric" id="aeronet-fuel3" min="0" step="1" value="0" oninput="updateAeronetTotal()" style="width:110px; padding:6px; font-size:1.1rem; text-align:right; border:1px solid #ccc; border-radius:6px;">
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <label style="font-weight:bold;">Fuel 4</label>
-            <input type="number" inputmode="numeric" id="aeronet-fuel4" min="0" step="1" value="0" oninput="updateAeronetTotal()" style="width:110px; padding:6px; font-size:1.1rem; text-align:right; border:1px solid #ccc; border-radius:6px;">
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <label style="font-weight:bold;">Fuel 5</label>
-            <input type="number" inputmode="numeric" id="aeronet-fuel5" min="0" step="1" value="0" oninput="updateAeronetTotal()" style="width:110px; padding:6px; font-size:1.1rem; text-align:right; border:1px solid #ccc; border-radius:6px;">
-        </div>
-    </div>
-
-    <div class="bubble-v198">
-        <div style="background:#000; color:#fff; padding:4px; font-size:0.8rem; margin-bottom:5px; font-weight:bold;">Total Fuel Added</div>
-        <div class="fuel-big-p1" id="aeronet-total-liters">0 L</div>
-    </div>
-
-    <button style="background:#444; color:#fff; width:100%; padding:14px; border:none; border-radius:0; font-weight:bold; font-size:1rem; margin-top:10px;" onclick="goBack()">&#8592; BACK</button>
-</div>
-
 <!-- ── MANUAL PAGE (loaded inside app) ── -->
 <div id="manual-page" class="page" style="padding:0;">
-    <button style="background:#444; color:#fff; width:100%; padding:14px; border:none; border-radius:0; font-weight:bold; font-size:1rem;" onclick="goBack()">&#8592; EXIT MANUAL</button>
+    <button style="background:#444; color:#fff; width:100%; padding:14px; border:none; border-radius:0; font-weight:bold; font-size:1rem;" onclick="showPage('calc-page')">&#8592; EXIT MANUAL</button>
     <iframe id="manual-frame" src="manual.html" style="width:100%; height:calc(100% - 50px); border:none; display:block;"></iframe>
 </div>
 
 <!-- ── LOG PAGE ── -->
 <div id="log-page" class="page">
-    <button onclick="goBack()" style="background:#28a745; color:#fff; width:100%; padding:16px; margin-bottom:12px; border:2px solid #000; border-radius:8px; font-weight:bold;">BACK</button>
+    <button onclick="showPage('timer-page')" style="background:#28a745; color:#fff; width:100%; padding:16px; margin-bottom:12px; border:2px solid #000; border-radius:8px; font-weight:bold;">BACK</button>
     <table class="log-table">
         <thead>
             <tr><th>Date</th><th>Reg</th><th>Eng Block</th><th>HH:MM</th><th>Eng</th><th>Flt Block</th><th>HH:MM</th><th>Flt</th></tr>
@@ -618,7 +463,7 @@
 
 <script>
     // ── App version — change this ONE line to update everywhere ───────────────
-    var APP_VERSION = 'V10.4';
+    var APP_VERSION = 'V8.9';
     document.getElementById('app-title').textContent = 'Tanking app ' + APP_VERSION;
     document.title = 'Tanking app ' + APP_VERSION;
     // ── Service Worker ────────────────────────────────────────────────────────
@@ -635,10 +480,10 @@
         });
     }
 
-    // Let the manual page's own Exit button (clicked inside the iframe) close back to wherever manual was opened from
+    // Let the manual page's own Exit button (clicked inside the iframe) close back to the calc page
     window.addEventListener('message', function(e) {
         if (e.data && e.data.type === 'EXIT_MANUAL') {
-            goBack();
+            showPage('calc-page');
         }
         if (e.data && e.data.type === 'FORCE_UPDATE_DONE') {
             finishForceUpdate();
@@ -744,24 +589,6 @@
 
     // no-op — kept so any stray SW FORCE_UPDATE_DONE messages don't throw
     function finishForceUpdate() {}
-
-    // ── Setup Page ────────────────────────────────────────────────────────────
-    function updateSetupButtons() {
-        var isDark = document.body.classList.contains('dark');
-        var darkBtn = document.getElementById('setup-dark-btn');
-        var darkLbl = document.getElementById('setup-dark-label');
-        if (darkBtn && darkLbl) {
-            darkLbl.textContent = isDark ? 'Light Mode' : 'Dark Mode';
-            darkBtn.querySelector('.setup-btn-icon').textContent = isDark ? '☀' : '🌙';
-        }
-        var wakeBtn = document.getElementById('setup-wake-btn');
-        var wakeLbl = document.getElementById('setup-wake-label');
-        if (wakeBtn && wakeLbl) {
-            var awake = !!wakeLock;
-            wakeLbl.textContent = awake ? 'Awake (ON)' : 'Keep Awake';
-            wakeBtn.querySelector('.setup-btn-icon').textContent = awake ? '🔆' : '☀';
-        }
-    }
 
 
     // ── Toast ─────────────────────────────────────────────────────────────────
@@ -876,90 +703,6 @@
         document.getElementById('res-liters').innerText    = p < 0 ? "0"     : Math.round(p * 0.4536).toLocaleString();
     }
 
-     // ── Refuel Calculator ─────────────────────────────────────────────────────
-	    // Jet-A reference density is ~0.804 kg/L at 15°C (ASTM D1655). Corrected
-	    // for a typical 20°C fuel temperature that works out to ~0.800 kg/L,
-	    // which also matches the standard industry planning figure of 0.8 kg/L.
-	    // Good for quick ramp math - for certified W&B use the density on the
-	    // actual fuel slip/BOL.
-	    var JETA_KG_PER_LITER_20C = 0.800;
-	    function lbsToLitersJetA20C(lbs) {
-	        return (lbs * 0.453592) / JETA_KG_PER_LITER_20C;
-	    }
-
-	    function openRefuelCalc() {
-	        // Desired fuel starts from whatever is set on the main (page one)
-	        // fuel slider - that's the flight's planned load.
-	        var pageOneFuel = parseFloat(document.getElementById('fuel-slider').value) || 0;
-	        document.getElementById('refuel-desired-slider').value = pageOneFuel;
-	        // Actual fuel (what's currently in the tank) has no app source to
-	        // pull from - it's read off the aircraft gauge each time - so just
-	        // remember whatever was last entered here.
-	        var lastActual = parseFloat(localStorage.getItem('refuelActualLbs'));
-	        document.getElementById('refuel-actual-slider').value = isNaN(lastActual) ? 0 : lastActual;
-	        showPage('refuel-page');
-	        updateRefuelCalc();
-	        updateLbsLtr();
-	    }
-
-	    function updateRefuelCalc() {
-	        var desired = parseFloat(document.getElementById('refuel-desired-slider').value) || 0;
-	        var actual  = parseFloat(document.getElementById('refuel-actual-slider').value) || 0;
-	        localStorage.setItem('refuelActualLbs', actual);
-
-	        document.getElementById('refuel-desired-display').innerText = desired.toLocaleString() + ' lbs';
-	        document.getElementById('refuel-actual-display').innerText  = actual.toLocaleString() + ' lbs';
-
-	        var req = desired - actual;
-	        var lbsEl = document.getElementById('refuel-req-lbs');
-	        var ltrEl = document.getElementById('refuel-req-liters');
-	        if (req >= 0) {
-	            lbsEl.innerText = Math.round(req).toLocaleString();
-	            ltrEl.innerText = Math.round(lbsToLitersJetA20C(req)).toLocaleString();
-	        } else {
-	            lbsEl.innerText = 'DEFUEL ' + Math.round(-req).toLocaleString();
-	            ltrEl.innerText = Math.round(lbsToLitersJetA20C(-req)).toLocaleString();
-	        }
-	    }
-
-
-	    function updateLbsLtr() {
-	        var lbs = parseFloat(document.getElementById('lbsltr-slider').value) || 0;
-	        document.getElementById('lbsltr-display').innerText = lbs.toLocaleString() + ' lbs';
-	        document.getElementById('lbsltr-liters-display').innerText = Math.round(lbsToLitersJetA20C(lbs)).toLocaleString() + ' L';
-	    }
-
-	    function openAeronetCalc() {
-	        var lastStart = parseFloat(localStorage.getItem('aeronetStartLbs'));
-	        var lastEnd = parseFloat(localStorage.getItem('aeronetEndLbs'));
-	        document.getElementById('aeronet-start-slider').value = isNaN(lastStart) ? 0 : lastStart;
-	        document.getElementById('aeronet-end-slider').value = isNaN(lastEnd) ? 0 : lastEnd;
-	        showPage('aeronet-page');
-	        updateAeronetFuel();
-	        updateAeronetTotal();
-	    }
-
-	    function updateAeronetFuel() {
-	        var startLbs = parseFloat(document.getElementById('aeronet-start-slider').value) || 0;
-	        var endLbs = parseFloat(document.getElementById('aeronet-end-slider').value) || 0;
-	        localStorage.setItem('aeronetStartLbs', startLbs);
-	        localStorage.setItem('aeronetEndLbs', endLbs);
-	        document.getElementById('aeronet-start-lbs').innerText = startLbs.toLocaleString();
-	        document.getElementById('aeronet-start-liters').innerText = Math.round(lbsToLitersJetA20C(startLbs)).toLocaleString();
-	        document.getElementById('aeronet-end-lbs').innerText = endLbs.toLocaleString();
-	        document.getElementById('aeronet-end-liters').innerText = Math.round(lbsToLitersJetA20C(endLbs)).toLocaleString();
-	    }
-
-	    function updateAeronetTotal() {
-	        var ids = ['aeronet-fuel1','aeronet-fuel2','aeronet-fuel3','aeronet-fuel4','aeronet-fuel5'];
-	        var total = 0;
-	        for (var i = 0; i < ids.length; i++) {
-	            total += parseFloat(document.getElementById(ids[i]).value) || 0;
-	        }
-	        document.getElementById('aeronet-total-liters').innerText = Math.round(total).toLocaleString() + ' L';
-	    }
-
-
     // ── Helpers ───────────────────────────────────────────────────────────────
     function getTimeStr(d) { return (d ? new Date(d) : new Date()).toTimeString().slice(0,5); }
     function format(ms) {
@@ -972,36 +715,11 @@
     }
 
     // ── Page navigation ───────────────────────────────────────────────────────
-    // Real back-stack: every forward navigation (showPage) pushes the page you
-    // were just on. goBack() pops the stack and returns you there - works for
-    // any depth (flight -> setup -> aeronet -> back -> setup -> back -> flight),
-    // not just one remembered level.
-    var _navStack = [];
-
-    function _currentPageId() {
-        var cur = Array.from(document.querySelectorAll('.page')).find(function(p) {
-            return getComputedStyle(p).display !== 'none';
-        });
-        return cur ? cur.id : null;
-    }
-
-    function _switchToPage(id) {
+    function showPage(id) {
         cancelAnimationFrame(flyTick);
         document.querySelectorAll('.page').forEach(function(p) { p.style.display = 'none'; });
         document.getElementById(id).style.display = (id === 'flight-page') ? 'flex' : 'block';
-        if (id === 'setup-page') updateSetupButtons();
         setTimeout(function() { if (typeof fitActivePage === 'function') fitActivePage(); }, 80);
-    }
-
-    function showPage(id) {
-        var cur = _currentPageId();
-        if (cur && cur !== id) _navStack.push(cur);
-        _switchToPage(id);
-    }
-
-    function goBack() {
-        var prev = _navStack.pop() || 'calc-page'; // safety fallback if the stack is ever empty
-        _switchToPage(prev);
     }
 
     // ── Timers ────────────────────────────────────────────────────────────────
@@ -1390,7 +1108,7 @@
     function leaveFlight() {
         stopGPS();
         releaseWakeLock();
-        goBack();
+        showPage('timer-page');
     }
 
     // ── Screen Wake Lock (iPad must not sleep while flying) ────────────────────
@@ -1409,11 +1127,9 @@
         navigator.wakeLock.request('screen').then(function(lock) {
             wakeLock = lock;
             setWakeBtn(true);
-            if (typeof updateSetupButtons === 'function') updateSetupButtons();
             lock.addEventListener('release', function() {
                 wakeLock = null;
                 setWakeBtn(false);
-                if (typeof updateSetupButtons === 'function') updateSetupButtons();
             });
         }).catch(function() { setWakeBtn(false); });
     }
@@ -1422,7 +1138,6 @@
         wakeWanted = false;
         if (wakeLock) { wakeLock.release(); wakeLock = null; }
         setWakeBtn(false);
-        if (typeof updateSetupButtons === 'function') updateSetupButtons();
     }
 
     function toggleWakeLock() {
@@ -1627,7 +1342,6 @@
         if (needleDot) needleDot.setAttribute('fill', nc);
         var gaugeSvg = document.getElementById('gs-gauge-svg');
         if (gaugeSvg) { var paths = gaugeSvg.querySelectorAll('path'); if (paths[0]) paths[0].setAttribute('stroke', isDark ? '#444' : '#ddd'); }
-        if (typeof updateSetupButtons === 'function') updateSetupButtons();
     }
 
     function toggleDark() {

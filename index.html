@@ -567,10 +567,10 @@
     </div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
-        <button onclick="clearAeronetReceipts()" style="background:#c0392b; color:#fff; border:none; border-radius:10px; font-weight:bold; font-size:1rem;">CLEAR</button>
+        <button onclick="clearAeronetReceipts()" style="background:#000; color:#fff; border:2px solid #000; border-radius:10px; font-weight:bold; font-size:1rem;">CLEAR</button>
         <div class="bubble-v198" style="margin-bottom:0;">
             <div style="background:#000; color:#fff; padding:4px; font-size:0.8rem; margin-bottom:5px; font-weight:bold;">Total Fuel Added</div>
-            <div class="fuel-big-p1" id="aeronet-total-liters">= 0 L</div>
+            <div class="fuel-big-p1" id="aeronet-total-liters" style="font-size:2rem;">0 L</div>
         </div>
     </div>
 
@@ -967,7 +967,7 @@
 	            localStorage.setItem(AERONET_FUEL_KEYS[i], v);
 	            total += v;
 	        }
-	        document.getElementById('aeronet-total-liters').innerText = '= ' + Math.round(total).toLocaleString() + ' L';
+	        document.getElementById('aeronet-total-liters').innerText = Math.round(total).toLocaleString() + ' L';
 	    }
 
 	    function clearAeronetReceipts() {

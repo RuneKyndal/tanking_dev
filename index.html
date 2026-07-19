@@ -173,10 +173,10 @@
         body.dark .setup-btn.active { background: #1e7e34 !important; border-color: #28a745 !important; }
 
         /* ── NAVIGATION: MARK buttons ── */
-        .nav-mark-btn { position: absolute; width: 58px; height: 58px; border-radius: 50%; color: #fff; font-size: 0.6rem; padding: 0; z-index: 6; box-shadow: 0 2px 6px rgba(0,0,0,0.4); transition: box-shadow 0.2s; }
+        .nav-mark-btn { position: absolute; width: auto; height: auto; border-radius: 3px; color: #fff; font-size: 0.6rem; line-height: 1; padding: 4px 5px; z-index: 6; box-shadow: 0 2px 6px rgba(0,0,0,0.4); transition: box-shadow 0.2s; }
         .nav-mark-btn#nav-mark-blue { background: #0066ff; border-color: #003d99; }
         .nav-mark-btn#nav-mark-red  { background: #cc0000; border-color: #800000; }
-        .nav-mark-btn.marked { box-shadow: 0 0 0 4px #ffcc00, 0 2px 6px rgba(0,0,0,0.4); }
+        .nav-mark-btn.marked { box-shadow: 0 0 0 3px #fff, 0 2px 6px rgba(0,0,0,0.4); }
         body.nav-off .nav-mark-btn { display: none !important; }
 
         /* ── NAVIGATION: relative bearing pointer overlay ── */
@@ -433,8 +433,8 @@
                     </g>
                 </svg>
                 <!-- NAV: MARK waypoint buttons, flanking the arc's center pivot -->
-                <button id="nav-mark-blue" class="nav-mark-btn" style="left:10%; top:74%; transform:translate(-50%,-50%);" onclick="handleMark('blue')">MARK</button>
-                <button id="nav-mark-red"  class="nav-mark-btn" style="left:90%; top:74%; transform:translate(-50%,-50%);" onclick="handleMark('red')">MARK</button>
+                <button id="nav-mark-blue" class="nav-mark-btn" style="left:32%; top:80%; transform:translate(-50%,-50%);" onclick="handleMark('blue')">MARK</button>
+                <button id="nav-mark-red"  class="nav-mark-btn" style="left:68%; top:80%; transform:translate(-50%,-50%);" onclick="handleMark('red')">MARK</button>
             </div>
         </div>
         <!-- end right col -->
